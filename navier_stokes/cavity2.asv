@@ -1,6 +1,13 @@
 clear;close all;clc;
 
 % D2Q9 solver
+% Same as cavity, but just with clearer distinction between the physical,
+% nondimensional and numerical/discrete parameters.
+
+% Physical parameters.
+Lp = 1; % 
+Up = 1; % Cavity lid velocity.
+nup = ; %
 
 % Numerical input parameters.
 nodes = [100, 100]; % x nodes, y nodes.

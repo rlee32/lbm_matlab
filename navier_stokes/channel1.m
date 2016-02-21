@@ -1,6 +1,11 @@
 clear;close all;clc;
 
 % D2Q9 solver
+% Simple channel.
+% West: fixed-velocity inlet
+% North: wall
+% South: wall 
+% East: 2nd-order-extrapolation outlet.
 
 % Numerical input parameters.
 nodes = [100, 100]; % x nodes, y nodes.
@@ -10,7 +15,6 @@ dt = 1; % timestep.
 
 % Physical input parameters.
 u0 = 0.1;
-v0 = 0.0;
 rho0 = 5;
 alpha = 0.01;
 Re = u0*nodes(1)/alpha;
@@ -38,9 +42,14 @@ omega = 1 / ( 3*alpha + 0.5 );
 % Initialize.
 rho = rho0*ones(nodes(2),nodes(1));
 u = u0*ones(nodes(2),nodes(1));
-v = v0*ones(nodes(2),nodes(1));
+v = zeros(nodes(2),nodes(1));
 f = zeros(nodes(2),nodes(1),9);
 feq = zeros(nodes(2),nodes(1),9);
+% Wall BCs.
+u(1,:) = 0;
+v(1,:) = 0;
+u(end,:) = 0;
+v(end,:) = 0;
 
 % Main loop.
 reconstruction_time = 0;
@@ -71,80 +80,38 @@ for iter = 1:timesteps
     streaming_time = streaming_time + toc;
     % BC.
     tic;
-    
-%     u_east = -1 + ( f(:,end,1) + f(:,end,3) + f(:,end,5) + ...
-%         2*( f(:,end,2) + f(:,end,6) + f(:,end,9) ) ) / rho0;
-%     f(:,end,4) = f(:,end,2) - ...
-%         2/3 * rho0 * u_east; % East outlet (known pressure / density).
-%     f(:,end,8) = f(:,end,6) + 0.5*( f(:,end,3) - f(:,end,5) ) - ...
-%         1/6 * rho0 * u_east; % East outlet (known pressure / density).
-%     f(:,end,7) = f(:,end,9) - 0.5*( f(:,end,3) - f(:,end,5) ) - ...
-%         1/6 * rho0 * u_east; % East outlet (known pressure / density).
-%     
-%     v_north = -1 + ( f(end,:,1) + f(end,:,2) + f(end,:,4) + ...
-%         2*( f(end,:,3) + f(end,:,6) + f(end,:,7) ) ) / rho0;
-%     f(end,:,5) = f(end,:,3) - ...
-%         2/3 * rho0 * v_north; % North outlet (known pressure / density).
-%     f(end,:,9) = f(end,:,7) - 0.5*( f(end,:,2) - f(end,:,4) ) - ...
-%         1/6 * rho0 * v_north; % North outlet (known pressure / density).
-%     f(end,:,8) = f(end,:,6) + 0.5*( f(end,:,2) - f(end,:,4) ) - ...
-%         1/6 * rho0 * v_north; % North outlet (known pressure / density).
-    
+    % Only horizontal velocity.
     rho_west = ( 1 / ( 1 - u0 ) ) * ...
-        f(:,1,1) + f(:,1,3) + f(:,1,5) + ...
-        2*( f(:,1,4) + f(:,1,7) + f(:,1,8) );
-    f(:,1,2) = f(:,1,4) + 2 / 3 * u0 * rho_west; % West inlet.
-    f(:,1,6) = f(:,1,8) - 0.5 * ( f(:,1,3) - f(:,1,5) ) + ...
-        ( u0/6 + v0/2 )* rho_west; % West inlet.
-    f(:,1,9) = f(:,1,7) + 0.5 * ( f(:,1,3) - f(:,1,5) ) + ...
-        ( u0/6 - v0/2 )* rho_west; % West inlet.
-    
-    rho_south = ( 1 / ( 1 - v0 ) ) * ...
-        f(1,:,1) + f(1,:,2) + f(1,:,4) + ...
-        2*( f(1,:,5) + f(1,:,8) + f(1,:,9) );
-    f(1,:,3) = f(1,:,5) + 2 / 3 * v0 * rho_south; % South inlet.
-    f(1,:,6) = f(1,:,8) - 0.5 * ( f(1,:,2) - f(1,:,4) ) + ...
-        ( v0/6 + u0/2 ) * rho_south; % South inlet.
-    f(1,:,7) = f(1,:,9) + 0.5 * ( f(1,:,2) - f(1,:,4) ) + ...
-        ( v0/6 - u0/2 ) * rho_south; % South inlet.
-
-    rho_east = ( 1 / ( 1 + u0 ) ) * ...
-        f(:,end,1) + f(:,end,3) + f(:,end,5) + ...
-        2*( f(:,end,2) + f(:,end,6) + f(:,end,9) );
-    f(:,end,4) = f(:,end,2) - 2 / 3 * u0 * rho_east; % East inlet.
-    f(:,end,8) = f(:,end,6) + 0.5 * ( f(:,end,3) - f(:,end,5) ) + ...
-        ( -u0/6 - v0/2 )* rho_east; % East inlet.
-    f(:,end,7) = f(:,end,9) - 0.5 * ( f(:,end,3) - f(:,end,5) ) + ...
-        ( -u0/6 + v0/2 )* rho_east; % East inlet.
-    
-    rho_north = ( 1 / ( 1 + v0 ) ) * ...
-        f(end,:,1) + f(end,:,2) + f(end,:,4) + ...
-        2*( f(end,:,3) + f(end,:,7) + f(end,:,6) );
-    f(end,:,5) = f(end,:,3) - 2 / 3 * v0 * rho_north; % North inlet.
-    f(end,:,9) = f(end,:,7) - 0.5 * ( f(end,:,2) - f(end,:,4) ) + ...
-        ( -v0/6 + u0/2 ) * rho_north; % North inlet.
-    f(end,:,8) = f(end,:,6) + 0.5 * ( f(end,:,2) - f(end,:,4) ) + ...
-        ( -v0/6 - u0/2 ) * rho_north; % North inlet.
-    
-    
+        ( f(2:end-1,1,1) + f(2:end-1,1,3) + f(2:end-1,1,5) + ...
+        2*( f(2:end-1,1,4) + f(2:end-1,1,7) + f(2:end-1,1,8) ) );
+    f(2:end-1,1,2) = f(2:end-1,1,4) + 2 / 3 * u0 * rho_west; % West inlet.
+    f(2:end-1,1,6) = f(2:end-1,1,8) + u0 / 6 * rho_west; % West inlet.
+    f(2:end-1,1,9) = f(2:end-1,1,7) + u0 / 6 * rho_west; % West inlet.
+    u_east = -1 + ( f(2:end-1,end,1) + f(2:end-1,end,3) + f(2:end-1,end,5) + ...
+        2*( f(2:end-1,end,2) + f(2:end-1,end,6) + f(2:end-1,end,9) ) ) / rho0;
+    f(2:end-1,end,4) = 2*f(2:end-1,end-1,4)...
+        - f(2:end-1,end-2,4); % East outlet (extrapolation).
+    f(2:end-1,end,8) = 2*f(2:end-1,end-1,8)...
+        - f(2:end-1,end-2,8); % East outlet (extrapolation).
+    f(2:end-1,end,7) = 2*f(2:end-1,end-1,7)...
+        - f(2:end-1,end-2,7); % East outlet (extrapolation).
+    f(1,:,3) = f(1,:,5); % South wall.
+    f(1,:,6) = f(1,:,8); % South wall.
+    f(1,:,7) = f(1,:,9); % South wall.
+    f(end,:,5) = f(end,:,3); % North wall.
+    f(end,:,9) = f(end,:,7); % North wall.
+    f(end,:,8) = f(end,:,6); % North wall.
     bc_time = bc_time + toc;
     % Density and velocity reconstruction.
     tic;
     rho = sum(f,3);
-    rho(:,1) = rho_west;
-    rho(1,:) = rho_south;
-%     rho(end,2:end) = rho0;
-%     rho(2:end,end) = rho0;
-%     u(2:end,2:end) = 0;
-%     v(2:end,2:end) = 0;
-%     for k = 1:9
-%         u(2:end,2:end) = u(2:end,2:end) + c(k,1)*f(2:end,2:end,k);
-%         v(2:end,2:end) = v(2:end,2:end) + c(k,2)*f(2:end,2:end,k);
-%     end
-%     u(2:end,2:end) = u(2:end,2:end) ./ rho(2:end,2:end);
-%     v(2:end,2:end) = v(2:end,2:end) ./ rho(2:end,2:end);
-    rho(end,:) = rho_north;
-    rho(:,end) = rho_east;
+    rho(2:end-1,1) = rho_west;
+    rho(1,:) = f(1,:,1) + f(1,:,2) + f(1,:,4) + ...
+        2 * ( f(1,:,8) + f(1,:,5) + f(1,:,9) );
+    rho(end,:) = f(end,:,1) + f(end,:,2) + f(end,:,4) + ...
+        2 * ( f(end,:,7) + f(end,:,3) + f(end,:,6) );
+%     rho(2:end-1,end) = f(2:end-1,end,1) + f(2:end-1,end,3) + f(2:end-1,end,5) + ...
+%         2 * ( f(2:end-1,end,2) + f(2:end-1,end,6) + f(2:end-1,end,9) );
     u(2:end-1,2:end-1) = 0;
     v(2:end-1,2:end-1) = 0;
     for k = 1:9
@@ -153,6 +120,7 @@ for iter = 1:timesteps
     end
     u(2:end-1,2:end-1) = u(2:end-1,2:end-1) ./ rho(2:end-1,2:end-1);
     v(2:end-1,2:end-1) = v(2:end-1,2:end-1) ./ rho(2:end-1,2:end-1);
+    v(2:end-1,end) = 0;
     reconstruction_time = reconstruction_time + toc;
 end
 
@@ -178,7 +146,7 @@ for i = 2:nodes(1)
     end
 end
 
-% % Plotting results!
+% Plotting results!
 figure;
 L = dh*[nodes(1)-1, nodes(2)-1] ; % x , y dimensions of physical domain.
 x = linspace(0,L(1),nodes(1))';

@@ -1,22 +1,33 @@
 clear;close all;clc;
 
 % D2Q9 solver
+% Same as cavity, but just with clearer distinction between the physical,
+% nondimensional and numerical/discrete parameters.
 
-% Numerical input parameters.
-nodes = [100, 100]; % x nodes, y nodes.
-dh = 1; % dh = dx = dy.
-timesteps = 40000;
-dt = 1; % timestep.
-
-% Physical input parameters.
-u0 = 0.1;
+% Physical parameters.
+L_p = 0.3; % Cavity dimension. 
+U_p = 0.3; % Cavity lid velocity.
+nu_p = 1.586e-5; % Physical kinematic viscosity.
 rho0 = 5;
-% Discrete parameters.
-alpha = 0.01;
-% Non-dimensional parameters.
-Re = u0*nodes(1)/alpha;
+% Nondimensional parameters.
+Re = L_p*U_p/nu_p;
 disp(['Reynolds number: ' num2str(Re)]);
+% Discrete/numerical parameters.
+nodes = 100;
+dt = 1;
+timesteps = 4000;
 
+% Derived physical parameters.
+t_p = L_p / U_p;
+disp(['Physical time scale: ' num2str(t_p) ' s']);
+% Derived discrete parameters.
+dh = 1/(nodes+1);
+nu_lb = dt / dh^2 / Re;
+tau = 3*nu_lb + 0.5;
+disp(['Relaxation time: ' num2str(tau)]);
+omega = 1 / tau;
+disp(['Relaxation parameter: ' num2str(omega)]);
+u_lb = dh / dt;
 % Lattice link constants.
 w = zeros(9,1);
 w(1) = 4/9;
@@ -33,17 +44,14 @@ c(7,:) = [-1, 1];
 c(8,:) = [-1, -1];
 c(9,:) = [1, -1];
 
-% Derived inputs.
-omega = 1 / ( 3*alpha + 0.5 );
-
 % Initialize.
-rho = rho0*ones(nodes(2),nodes(1));
-u = zeros(nodes(2),nodes(1));
-v = zeros(nodes(2),nodes(1));
-f = zeros(nodes(2),nodes(1),9);
-feq = zeros(nodes(2),nodes(1),9);
+rho = rho0*ones(nodes,nodes);
+u = zeros(nodes,nodes);
+v = zeros(nodes,nodes);
+f = zeros(nodes,nodes,9);
+feq = zeros(nodes,nodes,9);
 % BC.
-u(end,2:end-1) = u0;
+u(end,2:end-1) = u_lb;
 
 % Main loop.
 reconstruction_time = 0;
@@ -86,8 +94,8 @@ for iter = 1:timesteps
     rho_end = f(end,2:end-1,1) + f(end,2:end-1,2) + f(end,2:end-1,4) + ...
         2*( f(end,2:end-1,3) + f(end,2:end-1,7) + f(end,2:end-1,6) );
     f(end,2:end-1,5) = f(end,2:end-1,3); % North boundary (moving lid).
-    f(end,2:end-1,9) = f(end,2:end-1,7) + (u0 / 6)*rho_end; % North boundary (moving lid).
-    f(end,2:end-1,8) = f(end,2:end-1,6) - (u0 / 6)*rho_end; % North boundary (moving lid).
+    f(end,2:end-1,9) = f(end,2:end-1,7) + (u_lb / 6)*rho_end; % North boundary (moving lid).
+    f(end,2:end-1,8) = f(end,2:end-1,6) - (u_lb / 6)*rho_end; % North boundary (moving lid).
     bc_time = bc_time + toc;
     % Density and velocity reconstruction.
     tic;
@@ -117,11 +125,11 @@ disp(['Streaming fraction: ' num2str(streaming_time/total_time)]);
 disp(['BC fraction: ' num2str(bc_time/total_time)]);
 
 % Streamfunction calculation.
-strf = zeros(nodes(2),nodes(1));
-for i = 2:nodes(1)
+strf = zeros(nodes,nodes);
+for i = 2:nodes
     rho_av = 0.5*( rho(1,i-1) + rho(1,i) );
     strf(1,i) = strf(1,i-1) - 0.5*rho_av*( v(1,i-1) + v(1,i) );
-    for j = 2:nodes(2)
+    for j = 2:nodes
         rho_m = 0.5 * ( rho(j,i) + rho(j-1,i) );
         strf(j,i) = strf(j-1,i) + 0.5*rho_m*( u(j-1,i) + u(j,i) );
     end
@@ -129,9 +137,9 @@ end
 
 % % Plotting results!
 figure;
-L = dh*[nodes(1)-1, nodes(2)-1] ; % x , y dimensions of physical domain.
-x = linspace(0,L(1),nodes(1))';
-y = linspace(0,L(2),nodes(2))';
+L = dh*[nodes-1, nodes-1] ; % x , y dimensions of physical domain.
+x = linspace(0,L(1),nodes)';
+y = linspace(0,L(2),nodes)';
 [X, Y] = meshgrid(x,y);
 contour(X, Y, strf);
 title('Solution');

@@ -14,7 +14,7 @@ Re = L_p*U_p/nu_p;
 disp(['Reynolds number: ' num2str(Re)]);
 % Discrete/numerical parameters.
 nodes = 100;
-dt = 1;
+dt = 0.1;
 timesteps = 4000;
 
 % Derived physical parameters.

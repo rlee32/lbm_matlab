@@ -5,8 +5,8 @@ clear;close all;clc;
 % nondimensional and numerical/discrete parameters.
 
 % Physical parameters.
-L_p = 0.3; % Cavity dimension. 
-U_p = 0.3; % Cavity lid velocity.
+L_p = 0.2; % Cavity dimension. 
+U_p = 0.2; % Cavity lid velocity.
 nu_p = 1.586e-5; % Physical kinematic viscosity.
 rho0 = 5;
 % Nondimensional parameters.
@@ -15,7 +15,7 @@ disp(['Reynolds number: ' num2str(Re)]);
 % Discrete/numerical parameters.
 nodes = 100;
 dt = 0.1;
-timesteps = 4000;
+timesteps = 1000;
 
 % Derived physical parameters.
 t_p = L_p / U_p;
@@ -28,6 +28,7 @@ disp(['Relaxation time: ' num2str(tau)]);
 omega = 1 / tau;
 disp(['Relaxation parameter: ' num2str(omega)]);
 u_lb = dh / dt;
+disp(['Lattice speed: ' num2str(u_lb)])
 % Lattice link constants.
 w = zeros(9,1);
 w(1) = 4/9;
@@ -65,7 +66,10 @@ for iter = 1:timesteps
     t1 = u.*u + v.*v;
     for k = 1:9
         t2 = c(k,1)*u + c(k,2)*v;
-        feq(:,:,k) = w(k)*rho.*(1 + 3*t2 + 4.5*t2.^2 - 1.5*t1);
+        feq(:,:,k) = w(k)*rho.*(1 ...
+            + 3*t2 ...
+            + 4.5*t2.^2 ...
+            - 1.5*t1);
         f(:,:,k) = omega*feq(:,:,k)+(1-omega)*f(:,:,k);
     end
     collision_time = collision_time + toc;

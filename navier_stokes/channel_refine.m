@@ -14,21 +14,21 @@ clear;close all;clc;
 % The fine and coarse grids are both square.
 
 % Physical parameters.
-u_p = 0.1;
+u_p = 0.01;
 rho_p = 5;
 L_p = 1; % Height of each channel.
 nu_p = 1.568e-5; % kinematic viscosity, m^2/s.
 % Grid parameters.
 nodes_c = 100; % coarse nodes.
 dt_c = 1; % coarse timestep.
-timesteps = 10;
+timesteps = 1;
  
 % Derived nondimensional parameters.
-Re = u_p*Ly_p/nu_p;
+Re = u_p*L_p/nu_p;
 disp(['Reynolds number: ' num2str(Re)]);
 % Derived numerical parameters.
 nodes_f = 2*nodes_c - 2;
-dh_c = 1 / (nodes-1); % coarse spacing.
+dh_c = 1 / (nodes_c-1); % coarse spacing.
 dh_f = dh_c / 2; % coarse spacing.
 dt_f = dt_c / 2;
 nu_lb_c = dt_c / dh_c^2 / Re; % coarse viscosity.
@@ -62,8 +62,8 @@ u_c = u_lb_c*ones(nodes_c,nodes_c);
 u_f = u_lb_f*ones(nodes_f,nodes_f);
 v_c = zeros(nodes_c,nodes_c);
 v_f = zeros(nodes_f,nodes_f);
-f_c = zeros(nodes_c,nodes_c);
-f_f = zeros(nodes_f,nodes_f);
+f_c = zeros(nodes_c,nodes_c,9);
+f_f = zeros(nodes_f,nodes_f,9);
 % Wall BCs.
 u_c(1,:) = 0;
 v_c(1,:) = 0;
@@ -82,26 +82,16 @@ bc_time = 0;
 for iter = 1:timesteps
     disp(['Running timestep ' num2str(iter)]);
     % First, we explode coarse cells and map to fine.
-    % u
-    u_f(1:2:end,1) = u_c(:,end);
-    u_f(2:2:end,1) = u_c(2:end,end);
-    u_f(1:2:end,2) = u_c(:,end);
-    u_f(2:2:end,2) = u_c(2:end,end);
-    % v
-    v_f(1:2:end,1) = v_c(:,end);
-    v_f(2:2:end,1) = v_c(2:end,end);
-    v_f(1:2:end,2) = v_c(:,end);
-    v_f(2:2:end,2) = v_c(2:end,end);
-    % rho
-    rho_f(1:2:end,1) = rho_c(:,end);
-    rho_f(2:2:end,1) = rho_c(2:end,end);
-    rho_f(1:2:end,2) = rho_c(:,end);
-    rho_f(2:2:end,2) = rho_c(2:end,end);
-    % f
-    f_f(1:2:end,1) = f_c(:,end);
-    f_f(2:2:end,1) = f_c(2:end,end);
-    f_f(1:2:end,2) = f_c(:,end);
-    f_f(2:2:end,2) = f_c(2:end,end);
+    u_f = explode_column(u_c,u_f);
+    v_f = explode_column(v_c,v_f);
+    rho_f = explode_column(rho_c,rho_f);
+    for k = 1:9
+        f_f(:,:,k) = explode_column(f_c(:,:,k), f_f(:,:,k));
+%         f_f(1:2:end,1,k) = f_c(:,end,k);
+%         f_f(2:2:end,1,k) = f_c(2:end,end,k);
+%         f_f(1:2:end,2,k) = f_c(:,end,k);
+%         f_f(2:2:end,2,k) = f_c(2:end,end,k);
+    end
     % Second, we iterate on fine cells.
     for k = 1:2
         % Stream.
@@ -110,7 +100,7 @@ for iter = 1:timesteps
         streaming_time = streaming_time + toc;
         % Collide.
         tic;
-        f_f = collide(f_f,u_f,v_f,rho_f);
+        f_f = collide(f_f,u_f,v_f,rho_f,omega_f);
         collision_time = collision_time + toc;
         % BCs.
         tic;
@@ -128,13 +118,16 @@ for iter = 1:timesteps
     f_c = stream(f_c);
     streaming_time = streaming_time + toc;
     % Fourth, coalesce to coarse.
-    f_c(1,end) = 0.5 * ( f_f(1,1) + f_f(1,2) );
-    f_c(2:end-1,end) = 0.25 * ( f_f(2:2:end-1,1) + f_f(3:2:end-1,1)...
-        + f_f(2:2:end-1,2) + f_f(3:2:end-1,2) );
-    f_c(end,end) = 0.5 * ( f_f(end,1) + f_f(end,2) );
+    for k = [4, 7, 8]
+        f_c(1,end,k) = 0.5 * ( f_f(1,1,k) + f_f(1,2,k) );
+        f_c(2:end-1,end,k) = 0.25 * (...
+            f_f(2:2:end-1,1,k) + f_f(3:2:end-1,1,k)...
+            + f_f(2:2:end-1,2,k) + f_f(3:2:end-1,2,k) );
+        f_c(end,end,k) = 0.5 * ( f_f(end,1,k) + f_f(end,2,k) );
+    end
     % Fifth, collide on coarse.
     tic;
-    f_c = collide(f_c,u_c,v_c,rho_c);
+    f_c = collide(f_c,u_c,v_c,rho_c,omega_c);
     collision_time = collision_time + toc;
     % Coarse BC.
     tic;
@@ -160,23 +153,14 @@ disp(['Streaming fraction: ' num2str(streaming_time/total_time)]);
 disp(['BC fraction: ' num2str(bc_time/total_time)]);
 
 % Streamfunction calculation.
-strf = zeros(nodes(2),nodes(1));
-for i = 2:nodes(1)
-    rho_av = 0.5*( rho(1,i-1) + rho(1,i) );
-    strf(1,i) = strf(1,i-1) - 0.5*rho_av*( v(1,i-1) + v(1,i) );
-    for j = 2:nodes(2)
-        rho_m = 0.5 * ( rho(j,i) + rho(j-1,i) );
-        strf(j,i) = strf(j-1,i) + 0.5*rho_m*( u(j-1,i) + u(j,i) );
-    end
-end
+strf_c = streamfunction(u_c,v_c,rho_c);
 
 % Plotting results!
-figure;
-L = dh*[nodes(1)-1, nodes(2)-1] ; % x , y dimensions of physical domain.
-x = linspace(0,L(1),nodes(1))';
-y = linspace(0,L(2),nodes(2))';
+x = linspace(0,1,nodes_c)';
+y = linspace(0,1,nodes_c)';
 [X, Y] = meshgrid(x,y);
-contour(X(2:end,2:end), Y(2:end,2:end), strf(2:end,2:end));
+figure;
+contour(X(2:end,2:end), Y(2:end,2:end), strf_c(2:end,2:end));
 title('Solution');
 xlabel('x');
 ylabel('y');

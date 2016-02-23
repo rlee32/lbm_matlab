@@ -1,4 +1,4 @@
-function f = collide(f, u, v, rho)
+function f = collide(f, u, v, rho, omega)
 % D2Q9 collisions on 2-d matrix.
 w = zeros(9,1);
 w(1) = 4/9;
@@ -22,5 +22,5 @@ t1 = u.*u + v.*v;
 for k = 1:9
     t2 = c(k,1)*u + c(k,2)*v;
     feq(:,:,k) = w(k)*rho.*(1 + 3*t2 + 4.5*t2.^2 - 1.5*t1);
-    f(:,:,k) = omega*feq(:,:,k)+(1-omega_f)*f(:,:,k);
+    f(:,:,k) = omega*feq(:,:,k)+(1-omega)*f(:,:,k);
 end

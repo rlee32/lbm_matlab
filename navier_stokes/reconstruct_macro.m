@@ -1,4 +1,4 @@
-function [u,v,rho] = reconstruct_macro(f)
+function [u,v,rho] = reconstruct_macro(f,u,v)
 % D2Q9
 % Reconstructs the macroscale variables from the mesoscale variables.
 % Only on the interior, not the BCs.

@@ -108,11 +108,21 @@ disp(['BC fraction: ' num2str(bc_time/total_time)]);
 
 % Streamfunction calculation.
 strf = streamfunction(u,v,rho);
+% strf = zeros(nodes,nodes);
+% for i = 2:nodes
+%     rho_av = 0.5*( rho(1,i-1) + rho(1,i) );
+%     strf(1,i) = strf(1,i-1) - 0.5*rho_av*( v(1,i-1) + v(1,i) );
+%     for j = 2:nodes
+%         rho_m = 0.5 * ( rho(j,i) + rho(j-1,i) );
+%         strf(j,i) = strf(j-1,i) + 0.5*rho_m*( u(j-1,i) + u(j,i) );
+%     end
+% end
 
 % % Plotting results!
 figure;
-x = linspace(0,L_p,nodes)';
-y = linspace(0,L_p,nodes)';
+L = dh*[nodes-1, nodes-1] ; % x , y dimensions of physical domain.
+x = linspace(0,L(1),nodes)';
+y = linspace(0,L(2),nodes)';
 [X, Y] = meshgrid(x,y);
 contour(X, Y, strf);
 title('Solution');

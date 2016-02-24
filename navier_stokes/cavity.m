@@ -5,7 +5,7 @@ clear;close all;clc;
 % Numerical input parameters.
 nodes = [100, 100]; % x nodes, y nodes.
 dh = 1; % dh = dx = dy.
-timesteps = 40000;
+timesteps = 400;
 dt = 1; % timestep.
 
 % Physical input parameters.

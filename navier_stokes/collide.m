@@ -15,12 +15,10 @@ c(7,:) = [-1, 1];
 c(8,:) = [-1, -1];
 c(9,:) = [1, -1];
 
-[rows,cols] = size(u);
-feq = zeros(rows,cols,9);
 % Collide
 t1 = u.*u + v.*v;
 for k = 1:9
     t2 = c(k,1)*u + c(k,2)*v;
-    feq(:,:,k) = w(k)*rho.*(1 + 3*t2 + 4.5*t2.^2 - 1.5*t1);
-    f(:,:,k) = omega*feq(:,:,k)+(1-omega)*f(:,:,k);
+    feq = w(k)*rho.*(1 + 3*t2 + 4.5*t2.^2 - 1.5*t1);
+    f(:,:,k) = omega*feq+(1-omega)*f(:,:,k);
 end

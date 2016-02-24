@@ -21,7 +21,7 @@ nu_p = 1.568e-5; % kinematic viscosity, m^2/s.
 % Grid parameters.
 nodes_c = 100; % coarse nodes.
 dt_c = 1; % coarse timestep.
-timesteps = 5;
+timesteps = 2;
  
 % Derived nondimensional parameters.
 Re = u_p*L_p/nu_p;
@@ -39,21 +39,6 @@ omega_c = 1 / ( 3*tau_c + 0.5 );
 omega_f = 1 / ( 3*tau_f + 0.5 );
 u_lb_c = dh_c / dt_c;
 u_lb_f = dh_f / dt_f;
-% Lattice link constants.
-w = zeros(9,1);
-w(1) = 4/9;
-w(2:5) = 1/9;
-w(6:9) = 1/36;
-c = zeros(9,2);
-c(1,:) = [0, 0];
-c(2,:) = [1, 0];
-c(3,:) = [0, 1];
-c(4,:) = [-1, 0];
-c(5,:) = [0, -1];
-c(6,:) = [1, 1];
-c(7,:) = [-1, 1];
-c(8,:) = [-1, -1];
-c(9,:) = [1, -1];
 
 % Initialize.
 rho_c = rho_p*ones(nodes_c,nodes_c);
@@ -87,10 +72,6 @@ for iter = 1:timesteps
     rho_f = explode_column(rho_c,rho_f);
     for k = 1:9
         f_f(:,:,k) = explode_column(f_c(:,:,k), f_f(:,:,k));
-%         f_f(1:2:end,1,k) = f_c(:,end,k);
-%         f_f(2:2:end,1,k) = f_c(2:end,end,k);
-%         f_f(1:2:end,2,k) = f_c(:,end,k);
-%         f_f(2:2:end,2,k) = f_c(2:end,end,k);
     end
     % Second, we iterate on fine cells.
     for k = 1:2
@@ -107,10 +88,24 @@ for iter = 1:timesteps
         f_f = outlet_bc(f_f,'east');
         f_f = wall_bc(f_f,'south');
         f_f = wall_bc(f_f,'north');
+        u_f(1,:) = 0;
+        v_f(1,:) = 0;
+        u_f(end,:) = 0;
+        v_f(end,:) = 0;
         bc_time = bc_time + toc;
         % Density and velocity reconstruction.
         tic;
         [u_f, v_f, rho_f] = reconstruct_macro(f_f, u_f, v_f);
+%         rho(end,2:end) = f(end,2:end,1) + f(end,2:end,2) + f(end,2:end,4) + ...
+%             2*( f(end,2:end,3) + f(end,2:end,7) + f(end,2:end,6) );
+%         u(2:end-1,2:end) = 0;
+%         v(2:end-1,2:end) = 0;
+%         for k = 1:9
+%             u(2:end-1,2:end) = u(2:end-1,2:end) + c(k,1)*f(2:end-1,2:end,k);
+%             v(2:end-1,2:end) = v(2:end-1,2:end) + c(k,2)*f(2:end-1,2:end,k);
+%         end
+%         u(2:end-1,2:end) = u(2:end-1,2:end) ./ rho(2:end-1,2:end);
+%         v(2:end-1,2:end) = v(2:end-1,2:end) ./ rho(2:end-1,2:end);
         reconstruction_time = reconstruction_time + toc;
     end
     % Third, we stream on coarse.
@@ -134,6 +129,11 @@ for iter = 1:timesteps
     f_c = inlet_bc(f_c, u_lb_c, 'west');
     f_c = wall_bc(f_c,'south');
     f_c = wall_bc(f_c,'north');
+    u_c(1,:) = 0;
+    v_c(1,:) = 0;
+    u_c(end,:) = 0;
+    v_c(end,:) = 0;
+    u_c(:,1) = u_lb_c;
     bc_time = bc_time + toc;
     % Density and velocity reconstruction.
     tic;

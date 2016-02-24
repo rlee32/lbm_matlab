@@ -82,18 +82,22 @@ for iter = 1:timesteps
     bc_time = bc_time + toc;
     % Density and velocity reconstruction.
     tic;
-%     [u,v,rho] = reconstruct_macro(f);
-    rho = sum(f,3);
-    u(2:end-1,2:end) = 0;
-    v(2:end-1,2:end) = 0;
-    for k = 1:9
-        u(2:end-1,2:end) = u(2:end-1,2:end) + c(k,1)*f(2:end-1,2:end,k);
-        v(2:end-1,2:end) = v(2:end-1,2:end) + c(k,2)*f(2:end-1,2:end,k);
-    end
-    u(2:end-1,2:end) = u(2:end-1,2:end) ./ rho(2:end-1,2:end);
-    v(2:end-1,2:end) = v(2:end-1,2:end) ./ rho(2:end-1,2:end);
+    [u,v,rho] = reconstruct_macro(f,u,v);
+%     rho = sum(f,3);
+%     u(2:end-1,2:end-1) = 0;
+%     v(2:end-1,2:end-1) = 0;
+%     for k = 1:9
+%         u(2:end-1,2:end-1) = u(2:end-1,2:end-1) + c(k,1)*f(2:end-1,2:end-1,k);
+%         v(2:end-1,2:end-1) = v(2:end-1,2:end-1) + c(k,2)*f(2:end-1,2:end-1,k);
+%     end
+%     u(2:end-1,2:end-1) = u(2:end-1,2:end-1) ./ rho(2:end-1,2:end-1);
+%     v(2:end-1,2:end-1) = v(2:end-1,2:end-1) ./ rho(2:end-1,2:end-1);
     reconstruction_time = reconstruction_time + toc;
 end
+
+% Checks
+% should_be_zero = sum(v(:,1))+sum(v(:,end))+sum(v(1,:))+sum(v(end,:))
+% should_be_zero = sum(u(:,1))+sum(u(:,end))+sum(u(1,:))
 
 % Timing outputs.
 total_time = reconstruction_time + collision_time + streaming_time + bc_time;

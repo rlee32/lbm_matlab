@@ -15,18 +15,24 @@ c(8,:) = [-1, -1];
 c(9,:) = [1, -1];
 
 rho = sum(f,3);
-[rows, cols] = size(rho);
-u = zeros(rows,cols);
-v = zeros(rows,cols);
+
+% % Use entire matrices.
+% [rows, cols] = size(rho);
+% u = zeros(rows,cols);
+% v = zeros(rows,cols);
 % for k = 1:9
-%     u(2:end-1,2:end-1) = u(2:end-1,2:end-1) + c(k,1)*f(2:end-1,2:end-1,k);
-%     v(2:end-1,2:end-1) = v(2:end-1,2:end-1) + c(k,2)*f(2:end-1,2:end-1,k);
+%     u = u + c(k,1)*f(:,:,k);
+%     v = v + c(k,2)*f(:,:,k);
 % end
-% u(2:end-1,2:end-1) = u(2:end-1,2:end-1) ./ rho(2:end-1,2:end-1);
-% v(2:end-1,2:end-1) = v(2:end-1,2:end-1) ./ rho(2:end-1,2:end-1);
+% u = u ./ rho;
+% v = v ./ rho;
+
+% Use only interior points.
+u(2:end-1,2:end-1) = 0;
+v(2:end-1,2:end-1) = 0;
 for k = 1:9
-    u = u + c(k,1)*f(:,:,k);
-    v = v + c(k,2)*f(:,:,k);
+    u(2:end-1,2:end-1) = u(2:end-1,2:end-1) + c(k,1)*f(2:end-1,2:end-1,k);
+    v(2:end-1,2:end-1) = v(2:end-1,2:end-1) + c(k,2)*f(2:end-1,2:end-1,k);
 end
-u = u ./ rho;
-v = v ./ rho;
+u(2:end-1,2:end-1) = u(2:end-1,2:end-1) ./ rho(2:end-1,2:end-1);
+v(2:end-1,2:end-1) = v(2:end-1,2:end-1) ./ rho(2:end-1,2:end-1);

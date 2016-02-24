@@ -21,7 +21,7 @@ nu_p = 1.568e-5; % kinematic viscosity, m^2/s.
 % Grid parameters.
 nodes_c = 100; % coarse nodes.
 dt_c = 1; % coarse timestep.
-timesteps = 1;
+timesteps = 5;
  
 % Derived nondimensional parameters.
 Re = u_p*L_p/nu_p;
@@ -110,7 +110,7 @@ for iter = 1:timesteps
         bc_time = bc_time + toc;
         % Density and velocity reconstruction.
         tic;
-        [u_c, v_c, rho_c] = reconstruct_macro(f_c);
+        [u_f, v_f, rho_f] = reconstruct_macro(f_f, u_f, v_f);
         reconstruction_time = reconstruction_time + toc;
     end
     % Third, we stream on coarse.
@@ -137,7 +137,7 @@ for iter = 1:timesteps
     bc_time = bc_time + toc;
     % Density and velocity reconstruction.
     tic;
-    [u_c, v_c, rho_c] = reconstruct_macro(f_c);
+    [u_c, v_c, rho_c] = reconstruct_macro(f_c, u_c, v_c);
     reconstruction_time = reconstruction_time + toc;
 end
 
@@ -154,15 +154,25 @@ disp(['BC fraction: ' num2str(bc_time/total_time)]);
 
 % Streamfunction calculation.
 strf_c = streamfunction(u_c,v_c,rho_c);
+strf_f = streamfunction(u_f,v_f,rho_f);
 
 % Plotting results!
-x = linspace(0,1,nodes_c)';
-y = linspace(0,1,nodes_c)';
-[X, Y] = meshgrid(x,y);
+x_c = linspace(0,1,nodes_c)';
+y_c = linspace(0,1,nodes_c)';
+[X_c, Y_c] = meshgrid(x_c,y_c);
 figure;
-contour(X(2:end,2:end), Y(2:end,2:end), strf_c(2:end,2:end));
-title('Solution');
+contour(X_c(2:end,2:end), Y_c(2:end,2:end), strf_c(2:end,2:end));
+title('Coarse solution');
 xlabel('x');
 ylabel('y');
+x_f = linspace(0,1,nodes_f)';
+y_f = linspace(0,1,nodes_f)';
+[X_f, Y_f] = meshgrid(x_f,y_f);
+figure;
+contour(X_f(2:end,2:end), Y_f(2:end,2:end), strf_f(2:end,2:end));
+title('Fine solution');
+xlabel('x');
+ylabel('y');
+
 
 

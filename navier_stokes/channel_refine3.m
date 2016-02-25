@@ -50,8 +50,8 @@ rho_p = 1;
 L_p = 1; % Height of each channel.
 nu_p = 1.568e-5; % kinematic viscosity, m^2/s.
 % Grid parameters.
-cells_c = 20; % coarse cells.
-dt_c = 0.5; % coarse timestep.
+cells_c = 40; % coarse cells.
+dt_c = 0.1; % coarse timestep.
 timesteps = 1000;
  
 % Derived nondimensional parameters.
@@ -91,8 +91,8 @@ f_c = wall_bc(f_c,'south');
 f_c = wall_bc(f_c,'north');
 
 % Main loop.
+disp(['Running ' num2str(timesteps) ' timesteps...']);
 for iter = 1:timesteps
-    disp(['Running timestep ' num2str(iter)]);
     
     % Collide on both.
     f_c = collide(f_c,u_c,v_c,rho_c,omega_c);
@@ -167,6 +167,7 @@ for iter = 1:timesteps
     [u_f, v_f, rho_f] = reconstruct_macro_all(f_f);
     
     % VISUALIZATION
+    % Modified from Jonas Latt's cavity code on the Palabos website.
     if (mod(iter,10)==0)
         uu_c_ = sqrt(u_c.^2+v_c.^2);
         uu_c = zeros(cells_f,cells_f);
@@ -181,6 +182,7 @@ for iter = 1:timesteps
         axis equal off; drawnow
     end
 end
+disp('Done!');
 
 
 

@@ -68,12 +68,20 @@ reconstruction_time = 0;
 collision_time = 0;
 streaming_time = 0;
 bc_time = 0;
-tic;
-f_c = collide(f_c,u_c,v_c,rho_c,omega_c);
-collision_time = collision_time + toc;
 for iter = 1:timesteps
     disp(['Running timestep ' num2str(iter)]);
-    % First, we explode coarse cells and map to fine.
+    
+    % Collide on coarse.
+    tic;
+    f_c = collide(f_c,u_c,v_c,rho_c,omega_c);
+    collision_time = collision_time + toc;
+    
+    % Collide fine.
+    tic;
+    f_f = collide(f_f,u_f,v_f,rho_f,omega_f);
+    collision_time = collision_time + toc;
+    
+    % Explode coarse cells and map to fine.
     u_f = explode_column(u_c,u_f);
     v_f = explode_column(v_c,v_f);
     rho_f = explode_column(rho_c,rho_f);
@@ -81,60 +89,70 @@ for iter = 1:timesteps
     for k = 1:9
         f_f(:,:,k) = explode_column(scale*f_c(:,:,k), f_f(:,:,k));
     end
-    % Second, we iterate on fine cells.
-    for k = 1:2
-        % Stream.
-        tic;
-        f_f = stream(f_f);
-        streaming_time = streaming_time + toc;
-        % Collide.
-        tic;
-        f_f = collide(f_f,u_f,v_f,rho_f,omega_f);
-        collision_time = collision_time + toc;
-        % BCs.
-        tic;
-        f_f = outlet_bc(f_f,'east');
-        f_f = wall_bc(f_f,'south');
-        f_f = wall_bc(f_f,'north');
-        u_f(1,:) = 0;
-        v_f(1,:) = 0;
-        u_f(end,:) = 0;
-        v_f(end,:) = 0;
-        bc_time = bc_time + toc;
-        % Density and velocity reconstruction.
-        tic;
-        [u_f, v_f, rho_f] = reconstruct_macro(f_f, u_f, v_f);
-        [u_f, v_f] = reconstruct_macro_column(f_f, u_f, v_f, 'east', 0);
-        [u_f, v_f] = reconstruct_macro_column(f_f, u_f, v_f, 'west', 0);
-%         rho(end,2:end) = f(end,2:end,1) + f(end,2:end,2) + f(end,2:end,4) + ...
-%             2*( f(end,2:end,3) + f(end,2:end,7) + f(end,2:end,6) );
-%         u(2:end-1,2:end) = 0;
-%         v(2:end-1,2:end) = 0;
-%         for k = 1:9
-%             u(2:end-1,2:end) = u(2:end-1,2:end) + c(k,1)*f(2:end-1,2:end,k);
-%             v(2:end-1,2:end) = v(2:end-1,2:end) + c(k,2)*f(2:end-1,2:end,k);
-%         end
-%         u(2:end-1,2:end) = u(2:end-1,2:end) ./ rho(2:end-1,2:end);
-%         v(2:end-1,2:end) = v(2:end-1,2:end) ./ rho(2:end-1,2:end);
-        reconstruction_time = reconstruction_time + toc;
-    end
-    % Third, we stream on coarse.
+    
+    % Stream coarse.
     tic;
     f_c = stream(f_c);
     streaming_time = streaming_time + toc;
-    % Fourth, coalesce to coarse.
+    
+    % Stream fine.
+    tic;
+    f_f = stream(f_f);
+    streaming_time = streaming_time + toc;
+    
+    % Fine BCs.
+    tic;
+    f_f = outlet_bc(f_f,'east');
+    f_f = wall_bc(f_f,'south');
+    f_f = wall_bc(f_f,'north');
+    u_f(1,:) = 0;
+    v_f(1,:) = 0;
+    u_f(end,:) = 0;
+    v_f(end,:) = 0;
+    bc_time = bc_time + toc;
+    % Fine density and velocity reconstruction.
+    tic;
+    [u_f, v_f, rho_f] = reconstruct_macro(f_f, u_f, v_f);
+    [u_f, v_f] = reconstruct_macro_column(f_f, u_f, v_f, 'east', 0);
+    [u_f, v_f] = reconstruct_macro_column(f_f, u_f, v_f, 'west', 0);
+    reconstruction_time = reconstruction_time + toc;
+    
+    % Collide fine.
+    tic;
+    f_f = collide(f_f,u_f,v_f,rho_f,omega_f);
+    collision_time = collision_time + toc;
+    
+    % Stream fine.
+    tic;
+    f_f = stream(f_f);
+    streaming_time = streaming_time + toc;
+
+    % Coalesce to coarse.
     scale = m*tau_c/tau_f;
-    f_c(1,end,4) = scale * 0.5 * ( f_f(1,1,4) + f_f(1,2,4) );
     for k = [4, 7, 8]
+        f_c(1,end,k) = scale * 0.5 * ( f_f(1,1,k) + f_f(1,2,k) );
         f_c(2:end-1,end,k) = scale * 0.25 * (...
             f_f(2:2:end-1,1,k) + f_f(3:2:end-1,1,k)...
             + f_f(2:2:end-1,2,k) + f_f(3:2:end-1,2,k) );
+        f_c(end,end,k) = scale * 0.5 * ( f_f(end,1,k) + f_f(end,2,k) );
     end
-    f_c(end,end,4) = scale * 0.5 * ( f_f(end,1,4) + f_f(end,2,4) );
-    % Fifth, collide on coarse.
+
+    % Fine BCs.
     tic;
-    f_c = collide(f_c,u_c,v_c,rho_c,omega_c);
-    collision_time = collision_time + toc;
+    f_f = outlet_bc(f_f,'east');
+    f_f = wall_bc(f_f,'south');
+    f_f = wall_bc(f_f,'north');
+    u_f(1,:) = 0;
+    v_f(1,:) = 0;
+    u_f(end,:) = 0;
+    v_f(end,:) = 0;
+    bc_time = bc_time + toc;
+    % Fine density and velocity reconstruction.
+    tic;
+    [u_f, v_f, rho_f] = reconstruct_macro(f_f, u_f, v_f);
+    [u_f, v_f] = reconstruct_macro_column(f_f, u_f, v_f, 'east', 0);
+    [u_f, v_f] = reconstruct_macro_column(f_f, u_f, v_f, 'west', 0);
+    reconstruction_time = reconstruction_time + toc;
     % Coarse BC.
     tic;
     f_c = inlet_bc(f_c, u_lb_c, 'west');

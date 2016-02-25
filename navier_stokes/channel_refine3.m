@@ -1,7 +1,14 @@
+% Channel flow with non-uniform grid. 
+% D2Q9 solver of a simple channel, with a coarse-to-fine vertical grid 
+% interface in the middle of the channel.
+% Author: Robert Lee
+% Email: rlee32@gatech.edu
+
 clear;close all;clc;
 
 % Currently working! New graphical plotter! Works great! Success!
-% Note to self: streamfunction calculator (from Mohamed text) is whack...
+% Note to self: streamfunction calculator (from Mohamed text) does not work
+% properly here.
 
 % This differs from the other channel_refine files:
 % -Cell centers are not located right on the boundary, cell edges are.
@@ -15,9 +22,8 @@ clear;close all;clc;
 % Algorithm steps:
 % Initialize meso (f)
 % Apply meso BCs
+% Determine macro variables and apply macro BCs (coarse and fine)
 % Loop:
-%   Apply meso BCs
-%   Determine macro variables and apply macro BCs (coarse and fine)
 %   Collide coarse and fine.
 %   Apply meso BCs
 %   Explode coarse to interface
@@ -30,10 +36,8 @@ clear;close all;clc;
 %   Apply fine meso BC?
 %   Coalesce interface to coarse
 %   Apply coarse meso BC?
+%   Determine macro variables and apply macro BCs (coarse and fine)
 
-% D2Q9 solver
-% Simple channel, with a coarse-to-fine vertical grid interface in the 
-% middle of the channel.
 % West: fixed-velocity inlet
 % North: wall
 % South: wall 
@@ -51,7 +55,7 @@ L_p = 1; % Height of each channel.
 nu_p = 1.568e-5; % kinematic viscosity, m^2/s.
 % Grid parameters.
 cells_c = 40; % coarse cells.
-dt_c = 0.1; % coarse timestep.
+dt_c = 1; % coarse timestep.
 timesteps = 1000;
  
 % Derived nondimensional parameters.
@@ -76,12 +80,6 @@ m = dh_c / dh_f; % spacing ratio;
 % Initialize.
 f_c = 5*ones(cells_c,cells_c,9);
 f_f = 5*ones(cells_f,cells_f,9);
-% Determine macro variables and apply macro BCs (coarse and fine)
-[u_c, v_c, rho_c] = reconstruct_macro_all(f_c);
-u_c(:,1) = u_lb_c;
-v_c(:,1) = 0;
-[u_f, v_f, rho_f] = reconstruct_macro_all(f_f);
-
 % Apply meso BCs.
 f_f = outlet_bc(f_f,'east');
 f_f = wall_bc(f_f,'south');
@@ -89,6 +87,11 @@ f_f = wall_bc(f_f,'north');
 f_c = inlet_bc(f_c,u_lb_c,'west');
 f_c = wall_bc(f_c,'south');
 f_c = wall_bc(f_c,'north');
+% Determine macro variables and apply macro BCs (coarse and fine)
+[u_c, v_c, rho_c] = reconstruct_macro_all(f_c);
+u_c(:,1) = u_lb_c;
+v_c(:,1) = 0;
+[u_f, v_f, rho_f] = reconstruct_macro_all(f_f);
 
 % Main loop.
 disp(['Running ' num2str(timesteps) ' timesteps...']);
@@ -170,12 +173,16 @@ for iter = 1:timesteps
     % Modified from Jonas Latt's cavity code on the Palabos website.
     if (mod(iter,10)==0)
         uu_c_ = sqrt(u_c.^2+v_c.^2);
+%         uu_c_(1:2:end,end-1) = 0;
+%         uu_c_(2:2:end,end) = 0;
         uu_c = zeros(cells_f,cells_f);
         uu_c(1:2:end,1:2:end) = uu_c_;
         uu_c(1:2:end,2:2:end) = uu_c_;
         uu_c(2:2:end,1:2:end) = uu_c_;
         uu_c(2:2:end,2:2:end) = uu_c_;
         uu_f = sqrt(u_f.^2+v_f.^2);
+%         uu_f(1:2:end,1) = 0;
+%         uu_f(2:2:end,2) = 0;
         uu = [uu_c, uu_f];
         imagesc(uu/u_lb_c);
         colorbar

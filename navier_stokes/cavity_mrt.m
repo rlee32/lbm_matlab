@@ -66,6 +66,8 @@ v(:,end) = 0;
 % Main loop.
 disp(['Running ' num2str(timesteps) ' timesteps...']);
 for iter = 1:timesteps
+    disp(['Running iteration ' num2str(iter)]);
+    
     % Collision.
     f = collide_mrt(f, u, v, rho, nu_lb);
     

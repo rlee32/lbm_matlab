@@ -19,13 +19,13 @@ clear;close all;clc;
 %   Determine macro variables and apply macro BCs
 
 % Physical parameters.
-L_p = 0.2; %1.1; % Cavity dimension. 
-U_p = 6; %1.1; % Cavity lid velocity.
+L_p = 2.5; %1.1; % Cavity dimension. 
+U_p = 5; %1.1; % Cavity lid velocity.
 nu_p = 1.2e-3; % 1.586e-5; % Physical kinematic viscosity.
 rho0 = 1;
 % Discrete/numerical parameters.
 nodes = 100;
-dt = .001;
+dt = .002;
 timesteps = 10000;
 
 % Derived nondimensional parameters.

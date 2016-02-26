@@ -5,10 +5,10 @@ clear;close all;clc;
 % nondimensional and numerical/discrete parameters.
 
 % Physical parameters.
-L_p = 0.2; % Cavity dimension. 
-U_p = 0.2; % Cavity lid velocity.
-nu_p = 1.586e-5; % Physical kinematic viscosity.
-rho0 = 5;
+L_p = .3; % Cavity dimension. 
+U_p = .2; % Cavity lid velocity.
+nu_p = 1.568e-5; % Physical kinematic viscosity.
+rho0 = 1;
 % Nondimensional parameters.
 Re = L_p*U_p/nu_p;
 disp(['Reynolds number: ' num2str(Re)]);
@@ -27,7 +27,7 @@ tau = 3*nu_lb + 0.5;
 disp(['Relaxation time: ' num2str(tau)]);
 omega = 1 / tau;
 disp(['Relaxation parameter: ' num2str(omega)]);
-u_lb = dh / dt;
+u_lb = dt / dh;
 disp(['Lattice speed: ' num2str(u_lb)])
 % Lattice link constants.
 w = zeros(9,1);

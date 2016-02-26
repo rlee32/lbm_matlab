@@ -72,8 +72,8 @@ tau_c = 3*nu_lb_c + 0.5; % coarse relaxation time.
 tau_f = 3*nu_lb_f + 0.5; % fine relaxation time.
 omega_c = 1 / ( 3*tau_c + 0.5 );
 omega_f = 1 / ( 3*tau_f + 0.5 );
-u_lb_c = dh_c / dt_c;
-u_lb_f = dh_f / dt_f;
+u_lb_c = dt_c / dh_c;
+u_lb_f = dt_f / dh_f;
 disp(['Relaxation time ratio: ' num2str(tau_f/tau_c)]);
 m = dh_c / dh_f; % spacing ratio;
 

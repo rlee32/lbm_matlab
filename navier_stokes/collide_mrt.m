@@ -2,21 +2,6 @@ function f = collide_mrt(f, u, v, rho, nu_lb)
 % D2Q9 collisions on 2-d matrix.
 % Multiple relaxation time formulation.
 
-w = zeros(9,1);
-w(1) = 4/9;
-w(2:5) = 1/9;
-w(6:9) = 1/36;
-c = zeros(9,2);
-c(1,:) = [0, 0];
-c(2,:) = [1, 0];
-c(3,:) = [0, 1];
-c(4,:) = [-1, 0];
-c(5,:) = [0, -1];
-c(6,:) = [1, 1];
-c(7,:) = [-1, 1];
-c(8,:) = [-1, -1];
-c(9,:) = [1, -1];
-
 M = [ones(1,9);...
     -4, -ones(1,4), 2*ones(1,4);
     4, -2*ones(1,4), ones(1,4);
@@ -32,7 +17,6 @@ nu_term = 2 / ( 1 + 6*nu_lb );
 S_vec = [1, 1.2, 1, 1, 1.2, 1, 1.2, nu_term, nu_term]';
 
 % Collide
-t1 = u.*u + v.*v;
 ru = rho.*u;
 rv = rho.*v;
 ru2rv2 = ru.^2 + rv.^2;

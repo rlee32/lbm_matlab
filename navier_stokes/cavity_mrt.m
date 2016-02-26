@@ -19,12 +19,10 @@ clear;close all;clc;
 %   Determine macro variables and apply macro BCs
 
 % Physical parameters.
-L_p = 0.2;%1.1; % Cavity dimension. 
-U_p = 6;%1.1; % Cavity lid velocity.
-nu_p = 1.2e-3;%1.586e-5; % Physical kinematic viscosity.
+L_p = 0.2; %1.1; % Cavity dimension. 
+U_p = 6; %1.1; % Cavity lid velocity.
+nu_p = 1.2e-3; % 1.586e-5; % Physical kinematic viscosity.
 rho0 = 1;
-cut_start_y = 0.5; % non-dimensional y-position on the west boundary.
-cut_end_x = 0.5; % non-dimensional x-position on the south boundary.
 % Discrete/numerical parameters.
 nodes = 100;
 dt = .001;
@@ -42,8 +40,8 @@ nu_lb = dt / dh^2 / Re;
 disp(['Lattice viscosity: ' num2str(nu_lb)]);
 tau = 3*nu_lb + 0.5;
 disp(['Relaxation time: ' num2str(tau)]);
-omega = 1 / tau;
-disp(['Relaxation parameter: ' num2str(omega)]);
+% omega = 1 / tau;
+% disp(['Relaxation parameter: ' num2str(omega)]);
 u_lb = dt / dh;
 disp(['Lattice speed: ' num2str(u_lb)])
 
@@ -69,7 +67,7 @@ v(:,end) = 0;
 disp(['Running ' num2str(timesteps) ' timesteps...']);
 for iter = 1:timesteps
     % Collision.
-    f = collide(f, u, v, rho, omega);
+    f = collide_mrt(f, u, v, rho, nu_lb);
     
     % Apply meso BCs.
     f = moving_wall_bc(f,'north',u_lb);

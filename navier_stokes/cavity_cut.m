@@ -78,9 +78,46 @@ end
 % Pgram defined by pgram_height, cut_length, unit_normal, unit_parallel.
 touched = zeros(nodes,nodes,1);
 coord_min = dh*(cumsum(ones(nodes,1))-1) - dh/2;
-for j = 1:nodes
-    for i = 1:nodes
-        
+pgram_xmax = cut_end_x + unit_normal(1)*pgram_height;
+pgram_ymax = cut_start_y + unit_normal(2)*pgram_height;
+max_y_node = ceil((pgram_ymax + dh) / dh + 1);
+max_x_node = ceil((pgram_xmax + dh) / dh + 1);
+for j = 1:min([max_y_node, nodes])
+    for i = 1:min([max_x_node, nodes])
+        % Overlap detection between 2 bodies at a time.
+        % We detect overlap by projecting the 2 bodies to all of the
+        % surface normals (one normal at a time), and check these 1D
+        % criteria (all 4 have to meet in order for there to be overlap).
+        cell_min = [coord_min(i)-cut_end_x, coord_min(j)];
+        cell_max = cell_min+dh;
+        % pgram projections
+        pgram_projection = [0,pgram_height];
+        cell_projection = [dot(unit_normal,cell_min), dot(unit_normal,cell_max)];
+        if ( cell_projection(2) <= pgram_projection(1) ) ...
+                || ( cell_projection(1) >= pgram_projection )
+            continue
+        end
+        pgram_projection = [0,cut_length];
+        cell_projection = [dot(unit_parallel,cell_min), dot(unit_parallel,cell_max)];
+        if ( cell_projection(2) <= pgram_projection(1) ) ...
+                || ( cell_projection(1) >= pgram_projection )
+            continue
+        end
+        % cell projections
+        pgram_projection = [0,pgram_height];
+        cell_projection = [dot(unit_normal,cell_min), dot(unit_normal,cell_max)];
+        if ( cell_projection(2) <= pgram_projection(1) ) ...
+                || ( cell_projection(1) >= pgram_projection )
+            continue
+        end
+        pgram_projection = [0,pgram_height];
+        cell_projection = [dot(unit_normal,cell_min), dot(unit_normal,cell_max)];
+        if ( cell_projection(2) <= pgram_projection(1) ) ...
+                || ( cell_projection(1) >= pgram_projection )
+            continue
+        end
+        % if it makes it here, the cell passes all checks.
+        touched(j,i) = 1;
     end
 end
 

@@ -40,8 +40,6 @@ nu_lb = dt / dh^2 / Re;
 disp(['Lattice viscosity: ' num2str(nu_lb)]);
 tau = 3*nu_lb + 0.5;
 disp(['Relaxation time: ' num2str(tau)]);
-omega = 1 / tau;
-disp(['Relaxation parameter: ' num2str(omega)]);
 u_lb = dt / dh;
 disp(['Lattice speed: ' num2str(u_lb)])
 
@@ -66,12 +64,10 @@ v(:,end) = 0;
 % Main loop.
 disp(['Running ' num2str(timesteps) ' timesteps...']);
 for iter = 1:timesteps
-    if (mod(iter,timesteps/10)==0)
-        disp(['Ran ' num2str(iter) ' iterations']);
-    end
+    disp(['Running iteration ' num2str(iter)]);
     
     % Collision.
-    f = collide_mrt(f, u, v, rho, omega);
+    f = collide_mrt(f, u, v, rho, nu_lb);
     
     % Apply meso BCs.
     f = moving_wall_bc(f,'north',u_lb);

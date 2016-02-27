@@ -56,7 +56,6 @@ v_in_pgram = cc( cc(:,3) == 1, : );
 vertices = [ intersections(:,1:2); v_in_cell(:,1:2); v_in_pgram(:,1:2) ];
 if ~isempty(vertices)
     vertices = reorder_polygon_points(vertices);
-    vertices
     area = polyarea( vertices(:,1), vertices(:,2) );
 else
     area = 0;

@@ -17,9 +17,9 @@ points = zeros(4,3);
 cxr = [cmin(1), cmin(1) + dh]; % cell x range.
 cyr = [cmin(2), cmin(2) + dh]; % cell y range.
 sxr = segment(:,1); % segment x range.
-syr = segment(:,2); % segment y range.
-sdx = diff(sxr); % segment dx.
-sdy = diff(syr); % segment dy.
+syr = sortrows(segment(:,2),1); % segment y range.
+sdx = diff(segment(:,1)); % segment dx.
+sdy = diff(segment(:,2)); % segment dy.
 
 if sdx == 0
     sx = sxr(1);

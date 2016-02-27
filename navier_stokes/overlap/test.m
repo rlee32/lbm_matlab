@@ -59,10 +59,16 @@ clear; close all; clc;
 p0 = [0;0];
 v1 = rand(2,1);
 v2 = rand(2,1);
-dh = 0.1;
+p0 = [0.5;0];
+v1 = [-0.5;0.5];
+v2 = [0;1]* 0.0014;
+dh = 0.0101;
+
+% dh = 0.1;
 % cmin = rand(2,1);
 % cmin = (v1+v2)/2;
-cmin = (v1+v2)-dh/2;
+% cmin = (v1+v2)-dh/2;
+cmin = [0;0.5];
 area = overlap_pgram_cell(p0,v1,v2,cmin,dh);
 disp([ 'Overlap area: ' num2str(area) ]);
 plot([p0(1), p0(1)+v1(1)], [p0(2), p0(2)+v1(2)]);

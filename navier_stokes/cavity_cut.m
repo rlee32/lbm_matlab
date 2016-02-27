@@ -6,7 +6,8 @@
 % Email: rlee32@gatech.edu
 
 clear;close all;clc;
-
+addpath overlap
+addpath freewall
 % Algorithm steps:
 % Initialize meso (f)
 % Apply meso BCs
@@ -23,8 +24,8 @@ L_p = 0.6;%1.1; % Cavity dimension.
 U_p = 6;%1.1; % Cavity lid velocity.
 nu_p = 1.2e-3;%1.586e-5; % Physical kinematic viscosity.
 rho0 = 1;
-cut_start_y = 0.5; % non-dimensional y-position on the west boundary.
-cut_end_x = 0.5; % non-dimensional x-position on the south boundary.
+cut_start_y = 0.1; % non-dimensional y-position on the west boundary.
+cut_end_x = 0.1; % non-dimensional x-position on the south boundary.
 % Discrete/numerical parameters.
 nodes = 100;
 dt = .002;
@@ -45,7 +46,7 @@ disp(['Relaxation time: ' num2str(tau)]);
 omega = 1 / tau;
 disp(['Relaxation parameter: ' num2str(omega)]);
 u_lb = dt / dh;
-disp(['Lattice speed: ' num2str(u_lb)])
+disp(['Lattice speed: ' num2str(u_lb)]);
 
 % Determine which lattice vectors are relevant to the cut.
 parallel = [-cut_end_x, cut_start_y];
@@ -53,6 +54,7 @@ cut_length = norm(parallel);
 unit_parallel = parallel / cut_length;
 unit_normal = [-parallel(1), parallel(2)] / cut_length;
 pgram_height = cut_length * dt;
+disp(['Ratio of pgram height to dh: ' num2str(pgram_height/dh)]);
 c = zeros(9,2);
 c(1,:) = [0, 0];
 c(2,:) = [1, 0];
@@ -67,63 +69,68 @@ valid = zeros(9,1);
 for k = 1:9
     valid(k) = dot(unit_normal,c(k,:)) < 0;
 end
-c_wall = zeros(sum(valid),2);
-counter = 1;
-for k = 1:9
-    if valid(k)
-        c_wall(counter, :) = c(k, :);
-        counter = counter + 1;
+ci = find(valid==1); % the components relevant to wall.
+c_wall = c( valid == 1 , : );
+c_lengths = sqrt(sum(c_wall.^2,2));
+u_wall = diag(1./c_lengths)*c_wall;
+% Let's determine the pgrams.
+p0 = [cut_end_x, 0];
+v1 = parallel;
+v2 = -u_wall * pgram_height; % a v2 for every eligible lattice link.
+    
+plot([p0(1), p0(1)+v1(1)], [p0(2), p0(2)+v1(2)]);  
+hold on;      
+plot([p0(1)+v1(1),  p0(1)+v1(1)+v2(1)], [p0(2)+v1(2), p0(2)+v1(2)+v2(2)]);
+plot([p0(1), p0(1)+v2(1)], [p0(2), p0(2)+v2(2)]);
+plot([p0(1)+v2(1), p0(1)+v2(1)+v1(1)], [p0(2)+v2(2), p0(2)+v2(2)+v1(2)]);
+
+[pgram_links, ~] = size(v2);
+areas = zeros(nodes,nodes,pgram_links);
+cmin = linspace(0,1,nodes) - dh/2;
+j_f = ceil((cut_start_y + pgram_height)/dh + 1);
+non_zero_areas = 0;
+for j =  1:j_f
+    x_line = cut_end_x - (j-1)*(cut_start_y/cut_end_x*dh);
+%     disp(num2str(x_line));
+    margin = 2;
+    i_0 = floor((x_line - pgram_height)/dh - margin);
+    i_0 = max([1,i_0]);
+    i_f = ceil((x_line + pgram_height)/dh + margin);
+    i_f = min([nodes,i_f]);
+    for i =  i_0:i_f
+        for k = 1:pgram_links
+%             disp(['i,j ' num2str(i) ', ' num2str(j)])
+            cmin_ = [cmin(i), cmin(j)]';
+            areas(j,i,k) = overlap_pgram_cell(p0', v1', v2(k,:)', ...
+                cmin_, dh);
+            if areas(j,i,k)
+                plot([cmin_(1), cmin_(1)+dh],[cmin_(2), cmin_(2)]);
+                plot([cmin_(1)+dh, cmin_(1)],[cmin_(2)+dh, cmin_(2)+dh]);
+                plot([cmin_(1)+dh, cmin_(1)+dh],[cmin_(2)+dh, cmin_(2)]);
+                plot([cmin_(1), cmin_(1)],[cmin_(2), cmin_(2)+dh]);
+                areas(j,i,k) = overlap_pgram_cell(p0', v1', v2(k,:)', ...
+                    cmin_, dh);
+                non_zero_areas = non_zero_areas + 1;
+            end
+        end
     end
 end
-% Pgram defined by pgram_height, cut_length, unit_normal, unit_parallel.
-touched = zeros(nodes,nodes,1);
-coord_min = dh*(cumsum(ones(nodes,1))-1) - dh/2;
-pgram_xmax = cut_end_x + unit_normal(1)*pgram_height;
-pgram_ymax = cut_start_y + unit_normal(2)*pgram_height;
-max_y_node = ceil((pgram_ymax + dh) / dh + 1);
-max_x_node = ceil((pgram_xmax + dh) / dh + 1);
-for j = 1:min([max_y_node, nodes])
-    for i = 1:min([max_x_node, nodes])
-        % Overlap detection between 2 bodies at a time.
-        % We detect overlap by projecting the 2 bodies to all of the
-        % surface normals (one normal at a time), and check these 1D
-        % criteria (all 4 have to meet in order for there to be overlap).
-        cell_min = [coord_min(i)-cut_end_x, coord_min(j)];
-        cell_max = cell_min+dh;
-        % pgram projections
-        pgram_projection = [0,pgram_height];
-        cell_projection = [dot(unit_normal,cell_min), dot(unit_normal,cell_max)];
-        if ( cell_projection(2) <= pgram_projection(1) ) ...
-                || ( cell_projection(1) >= pgram_projection )
-            continue
-        end
-        pgram_projection = [0,cut_length];
-        cell_projection = [dot(unit_parallel,cell_min), dot(unit_parallel,cell_max)];
-        if ( cell_projection(2) <= pgram_projection(1) ) ...
-                || ( cell_projection(1) >= pgram_projection )
-            continue
-        end
-        % cell projections
-        pgram_projection = [0,pgram_height];
-        cell_projection = [dot(unit_normal,cell_min), dot(unit_normal,cell_max)];
-        if ( cell_projection(2) <= pgram_projection(1) ) ...
-                || ( cell_projection(1) >= pgram_projection )
-            continue
-        end
-        pgram_projection = [0,pgram_height];
-        cell_projection = [dot(unit_normal,cell_min), dot(unit_normal,cell_max)];
-        if ( cell_projection(2) <= pgram_projection(1) ) ...
-                || ( cell_projection(1) >= pgram_projection )
-            continue
-        end
-        % if it makes it here, the cell passes all checks.
-        touched(j,i) = 1;
-    end
+% Normalize the areas to the overall area in the pgram.
+for k = 1:pgram_links
+    areas(:,:,k) = areas(:,:,k) / sum(sum(areas(:,:,k)));
 end
+
+% % VISUALIZATION
+% % Modified from Jonas Latt's cavity code on the Palabos website.
+% uu = areas(:,:,3) / max(max(areas(:,:,3)));
+% imagesc(uu);
+% colorbar
+% axis equal off; drawnow
 
 % Initialize.
 f = ones(nodes,nodes,9);
 % Apply meso BCs.
+f = freewall(f,areas,ci);
 f = moving_wall_bc(f,'north',u_lb);
 f = wall_bc(f,'south');
 f = wall_bc(f,'east');

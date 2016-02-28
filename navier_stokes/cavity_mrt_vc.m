@@ -1,5 +1,6 @@
 % Lid-driven cavity with a cut corner.
-% A Lattice Boltzmann Multiple Relaxation Time D2Q9 solver.
+% A Lattice Boltzmann Multiple Relaxation Time D2Q9 solver,
+% with Viscosity Counteraction.
 % This features a non-lattice-aligned wall! 
 % Cell centers (nodes) are placed on the boundaries. 
 % Author: Robert Lee

@@ -8,6 +8,8 @@
 clear;close all;clc;
 addpath overlap
 addpath freewall
+addpath basic
+
 % Algorithm steps:
 % Initialize meso (f)
 % Apply meso BCs
@@ -186,7 +188,7 @@ for iter = 1:timesteps
     % Modified from Jonas Latt's cavity code on the Palabos website.
     if (mod(iter,10)==0)
         uu = sqrt(u.^2+v.^2) / u_lb;
-        imagesc(flipud(uu));
+        imagesc((uu));
         colorbar
         axis equal off; drawnow
     end

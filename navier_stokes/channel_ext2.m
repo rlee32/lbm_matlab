@@ -7,6 +7,9 @@ clear;close all;clc;
 % South: wall 
 % East: 2nd-order-extrapolation outlet.
 
+addpath basic
+addpath post
+
 % Numerical input parameters.
 nodes = [100, 100]; % x nodes, y nodes.
 dh = 1; % dh = dx = dy.

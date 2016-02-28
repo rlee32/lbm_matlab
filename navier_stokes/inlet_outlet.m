@@ -5,6 +5,9 @@ clear;close all;clc;
 % West and South: fixed-velocity inlet.
 % North and East: 0th-order extrapolation outlet.
 
+addpath basic
+addpath post
+
 % Numerical input parameters.
 nodes = [100, 100]; % x nodes, y nodes.
 dh = 1; % dh = dx = dy.

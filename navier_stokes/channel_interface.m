@@ -6,6 +6,9 @@
 
 clear;close all;clc;
 
+addpath basic
+addpath refine
+
 % Currently working! New graphical plotter! Works great! Success!
 % Note to self: streamfunction calculator (from Mohamed text) does not work
 % properly here.
@@ -49,13 +52,13 @@ clear;close all;clc;
 % The fine and coarse grids are both square.
 
 % Physical parameters.
-u_p = 1;
-rho_p = 1;
+u_p = 0.1;
+rho_p = 0.1;
 L_p = 1; % Height of each channel.
 nu_p = 1.568e-5; % kinematic viscosity, m^2/s.
 % Grid parameters.
 cells_c = 40; % coarse cells.
-dt_c = 1; % coarse timestep.
+dt_c = .001; % coarse timestep.
 timesteps = 1000;
  
 % Derived nondimensional parameters.

@@ -1,12 +1,16 @@
 clear;close all;clc;
 
 % D2Q9 solver
-% Same as cavity, but just with clearer distinction between the physical,
-% nondimensional and numerical/discrete parameters.
+% Same as cavity_mohamad, but just with clearer distinction between the physical,
+% nondimensional and numerical/discrete parameters, according to Jonas
+% Latt's 2008 paper on the topic.
+
+addpath basic
+addpath post
 
 % Physical parameters.
-L_p = .3; % Cavity dimension. 
-U_p = .2; % Cavity lid velocity.
+L_p = .1; % Cavity dimension. 
+U_p = .1; % Cavity lid velocity.
 nu_p = 1.568e-5; % Physical kinematic viscosity.
 rho0 = 1;
 % Nondimensional parameters.
@@ -14,8 +18,8 @@ Re = L_p*U_p/nu_p;
 disp(['Reynolds number: ' num2str(Re)]);
 % Discrete/numerical parameters.
 nodes = 100;
-dt = 0.1;
-timesteps = 1000;
+dt = 0.001;
+timesteps = 200;
 
 % Derived physical parameters.
 t_p = L_p / U_p;

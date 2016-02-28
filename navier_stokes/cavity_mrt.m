@@ -7,6 +7,8 @@
 
 clear;close all;clc;
 
+addpath basic
+
 % Algorithm steps:
 % Initialize meso (f)
 % Apply meso BCs

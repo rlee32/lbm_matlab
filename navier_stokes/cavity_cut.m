@@ -1,3 +1,5 @@
+% UNDER CONSTRUCTION
+
 % Lid-driven cavity with a cut corner.
 % A Lattice Boltzmann D2Q9 solver.
 % This features a non-lattice-aligned wall! 
@@ -9,6 +11,7 @@ clear;close all;clc;
 addpath overlap
 addpath freewall
 addpath basic
+addpath bc
 
 % Algorithm steps:
 % Initialize meso (f)

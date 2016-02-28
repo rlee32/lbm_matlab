@@ -1,7 +1,7 @@
 % UNDER CONSTRUCTION
 
 % A Lattice Boltzmann Multiple Relaxation Time D2Q9 solver,
-% with Viscosity Counteraction, on a lid-driven cavity.
+% with a Spalart Allmaras turbulence model, on a lid-driven cavity.
 % This features a non-lattice-aligned wall! 
 % Cell centers (nodes) are placed on the boundaries. 
 % Author: Robert Lee
@@ -52,6 +52,7 @@ disp(['Lattice speed: ' num2str(u_lb)])
 
 % Initialize.
 f = ones(nodes,nodes,9);
+nutilde = 1.2e-3*ones(nodes,nodes);
 % Apply meso BCs.
 f = moving_wall_bc(f,'north',u_lb);
 f = wall_bc(f,'south');
@@ -67,6 +68,10 @@ u(:,1) = 0;
 v(:,1) = 0;
 u(:,end) = 0;
 v(:,end) = 0;
+nutilde(1,:) = 0;
+nutilde(end,:) = 0;
+nutilde(:,1) = 0;
+nutilde(:,end) = 0;
 
 % Main loop.
 disp(['Running ' num2str(timesteps) ' timesteps...']);

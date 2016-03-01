@@ -35,6 +35,7 @@ cut_end_x = 0.1; % non-dimensional x-position on the south boundary.
 nodes = 100;
 dt = .002;
 timesteps = 10000;
+surfels = 100; % 'sruface elements', the number of cut surface elements attributed to the cut.
 
 % Derived nondimensional parameters.
 Re = L_p * U_p / nu_p;
@@ -58,8 +59,6 @@ parallel = [-cut_end_x, cut_start_y];
 cut_length = norm(parallel);
 unit_parallel = parallel / cut_length;
 unit_normal = [-parallel(1), parallel(2)] / cut_length;
-pgram_height = cut_length * dt;
-disp(['Ratio of pgram height to dh: ' num2str(pgram_height/dh)]);
 c = zeros(9,2);
 c(1,:) = [0, 0];
 c(2,:) = [1, 0];
@@ -75,19 +74,18 @@ for k = 1:9
     valid(k) = dot(unit_normal,c(k,:)) < 0;
 end
 ci = find(valid==1); % the components relevant to wall.
-c_wall = c( valid == 1 , : );
-c_lengths = sqrt(sum(c_wall.^2,2));
-u_wall = diag(1./c_lengths)*c_wall;
+c_wall = c( valid == 1 , : ); % lattice velocity components to use on wall.
+[considered, ~] = size(c_wall);
 % Let's determine the pgrams.
-p0 = [cut_end_x, 0];
-v1 = parallel;
-v2 = -u_wall * pgram_height; % a v2 for every eligible lattice link.
-    
-plot([p0(1), p0(1)+v1(1)], [p0(2), p0(2)+v1(2)]);  
-hold on;      
-plot([p0(1)+v1(1),  p0(1)+v1(1)+v2(1)], [p0(2)+v1(2), p0(2)+v1(2)+v2(2)]);
-plot([p0(1), p0(1)+v2(1)], [p0(2), p0(2)+v2(2)]);
-plot([p0(1)+v2(1), p0(1)+v2(1)+v1(1)], [p0(2)+v2(2), p0(2)+v2(2)+v1(2)]);
+p0 = (0:surfels-1)' * cut_length / surfels * unit_parallel;
+v1 = parallel / surfels;
+v2 = -c_wall .* repmat(unit_normal,length(c_wall),1) * dt; % a v2 for every eligible lattice link.
+
+for lv = 1:considered
+    for k = 1:5:surfels
+        plot_surfel(p0(k,:), v1, v2(lv,:));
+    end
+end
 
 [pgram_links, ~] = size(v2);
 areas = zeros(nodes,nodes,pgram_links);
@@ -135,7 +133,7 @@ end
 % Initialize.
 f = ones(nodes,nodes,9);
 % Apply meso BCs.
-f = freewall(f,areas,ci);
+% f = freewall(f,areas,ci);
 f = moving_wall_bc(f,'north',u_lb);
 f = wall_bc(f,'south');
 f = wall_bc(f,'east');

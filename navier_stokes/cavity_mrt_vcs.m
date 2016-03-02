@@ -1,7 +1,10 @@
 % UNDER CONSTRUCTION
 
 % A Lattice Boltzmann Multiple Relaxation Time D2Q9 solver,
-% with Viscosity Counteraction, on a lid-driven cavity.
+% with Viscosity Counteraction (Steady approximation), 
+% on a lid-driven cavity.
+% For the viscosity counteraction scheme, the steady approximation is used
+% (the implicit body force is neglected).
 % This features a non-lattice-aligned wall! 
 % Cell centers (nodes) are placed on the boundaries. 
 % Author: Robert Lee

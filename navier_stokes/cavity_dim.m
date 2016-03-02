@@ -97,6 +97,14 @@ for iter = 1:timesteps
 %     u(2:end-1,2:end-1) = u(2:end-1,2:end-1) ./ rho(2:end-1,2:end-1);
 %     v(2:end-1,2:end-1) = v(2:end-1,2:end-1) ./ rho(2:end-1,2:end-1);
     reconstruction_time = reconstruction_time + toc;
+    % VISUALIZATION
+    % Modified from Jonas Latt's cavity code on the Palabos website.
+    if (mod(iter,10)==0)
+        uu = sqrt(u.^2+v.^2) / u_lb;
+        imagesc(flipud(uu));
+        colorbar
+        axis equal off; drawnow
+    end
 end
 
 % Checks

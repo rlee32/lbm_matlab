@@ -35,7 +35,7 @@ cut_end_x = 0.1; % non-dimensional x-position on the south boundary.
 nodes = 100;
 dt = .002;
 timesteps = 10000;
-surfels = 100; % 'sruface elements', the number of cut surface elements attributed to the cut.
+surfels = 10; % 'sruface elements', the number of cut surface elements attributed to the cut.
 
 % Derived nondimensional parameters.
 Re = L_p * U_p / nu_p;
@@ -59,36 +59,27 @@ parallel = [-cut_end_x, cut_start_y];
 cut_length = norm(parallel);
 unit_parallel = parallel / cut_length;
 unit_normal = [-parallel(1), parallel(2)] / cut_length;
-c = zeros(9,2);
-c(1,:) = [0, 0];
-c(2,:) = [1, 0];
-c(3,:) = [0, 1];
-c(4,:) = [-1, 0];
-c(5,:) = [0, -1];
-c(6,:) = [1, 1];
-c(7,:) = [-1, 1];
-c(8,:) = [-1, -1];
-c(9,:) = [1, -1];
-valid = zeros(9,1);
-for k = 1:9
-    valid(k) = dot(unit_normal,c(k,:)) < 0;
-end
-ci = find(valid==1); % the components relevant to wall.
-c_wall = c( valid == 1 , : ); % lattice velocity components to use on wall.
+[c_wall, ci] = relevant_lattice_speeds(unit_normal);
 [considered, ~] = size(c_wall);
 % Let's determine the pgrams.
 p0 = (0:surfels-1)' * cut_length / surfels * unit_parallel;
+p0(:,1) = p0(:,1) + cut_end_x;
 v1 = parallel / surfels;
 v2 = -c_wall .* repmat(unit_normal,length(c_wall),1) * dt; % a v2 for every eligible lattice link.
 
+figure;
+hold on;
+plot_lattice_lines(nodes);
 for lv = 1:considered
     for k = 1:5:surfels
         plot_surfel(p0(k,:), v1, v2(lv,:));
+        [bmin, bmax, imin, imax] = pgram_bounds(p0(k,:), v1, v2(lv,:),dh);
+        plot_bounding_box(bmin,bmax);
+        weights = pgram_weights(p0(k,:), v1, v2(lv,:),dh);
     end
 end
 
-[pgram_links, ~] = size(v2);
-areas = zeros(nodes,nodes,pgram_links);
+areas = zeros(nodes,nodes,considered);
 cmin = linspace(0,1,nodes) - dh/2;
 j_f = ceil((cut_start_y + pgram_height)/dh + 1);
 non_zero_areas = 0;
@@ -101,7 +92,7 @@ for j =  1:j_f
     i_f = ceil((x_line + pgram_height)/dh + margin);
     i_f = min([nodes,i_f]);
     for i =  i_0:i_f
-        for k = 1:pgram_links
+        for k = 1:considered
 %             disp(['i,j ' num2str(i) ', ' num2str(j)])
             cmin_ = [cmin(i), cmin(j)]';
             areas(j,i,k) = overlap_pgram_cell(p0', v1', v2(k,:)', ...
@@ -119,7 +110,7 @@ for j =  1:j_f
     end
 end
 % Normalize the areas to the overall area in the pgram.
-for k = 1:pgram_links
+for k = 1:considered
     areas(:,:,k) = areas(:,:,k) / sum(sum(areas(:,:,k)));
 end
 

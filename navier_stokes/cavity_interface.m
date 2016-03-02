@@ -46,14 +46,14 @@ addpath basic
 % The fine and coarse grids are both square.
 
 % Physical parameters.
-u_p = 0.1;
+u_p = 0.4;
 rho_p = 1;
 L_p = 0.1; % Height of each channel.
 nu_p = 1.568e-5; % kinematic viscosity, m^2/s.
 % Grid parameters.
 cells_c = 100; % MUST BE EVEN! coarse vertical cells. the number of horizontal cells is half.
-dt_c = 0.01; % coarse timestep.
-timesteps = 1000;
+dt_c = 0.001; % coarse timestep.
+timesteps = 10000;
 
 % Derived nondimensional parameters.
 Re = u_p*L_p/nu_p;

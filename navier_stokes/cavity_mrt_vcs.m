@@ -14,6 +14,7 @@ clear;close all;clc;
 
 addpath basic
 addpath bc
+addpath vc
 
 % Algorithm steps:
 % Initialize meso (f)
@@ -32,6 +33,8 @@ U_p = 5; %1.1; % Cavity lid velocity.
 nu_p = 1.2e-3; % 1.586e-5; % Physical kinematic viscosity.
 rho0 = 1;
 % Discrete/numerical parameters.
+nu_c_f = 2; % multiplier of nu_lb (discrete viscosity); nu_lb*nu_c_f = nu_c 
+              % stabilizing parameter; viscosity "buffer".
 nodes = 100;
 dt = .002;
 timesteps = 10000;
@@ -45,8 +48,9 @@ disp(['Physical time scale: ' num2str(t_p) ' s']);
 % Derived discrete parameters.
 dh = 1/(nodes-1);
 nu_lb = dt / dh^2 / Re;
+nu_c = nu_lb*nu_c_f;
 disp(['Lattice viscosity: ' num2str(nu_lb)]);
-tau = 3*nu_lb + 0.5;
+tau = 3*(nu_lb+nu_c) + 0.5;
 disp(['Relaxation time: ' num2str(tau)]);
 omega = 1 / tau;
 disp(['Relaxation parameter: ' num2str(omega)]);
@@ -55,6 +59,7 @@ disp(['Lattice speed: ' num2str(u_lb)])
 
 % Initialize.
 f = ones(nodes,nodes,9);
+g = zeros(nodes,nodes,9); % VC body force distribution.
 % Apply meso BCs.
 f = moving_wall_bc(f,'north',u_lb);
 f = wall_bc(f,'south');
@@ -79,7 +84,7 @@ for iter = 1:timesteps
     end
     
     % Collision.
-    f = collide_mrt(f, u, v, rho, omega);
+    f = collide_mrt_vcs(f, u, v, rho, omega,nu_c,dh,dt);
     
     % Apply meso BCs.
     f = moving_wall_bc(f,'north',u_lb);

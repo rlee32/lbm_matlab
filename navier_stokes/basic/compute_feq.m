@@ -1,6 +1,5 @@
-function f = collide(f, u, v, rho, omega)
+function feq = compute_feq(f,rho,u,v)
 
-% D2Q9 collisions on 2-d matrix.
 w = zeros(9,1);
 w(1) = 4/9;
 w(2:5) = 1/9;
@@ -16,10 +15,10 @@ c(7,:) = [-1, 1];
 c(8,:) = [-1, -1];
 c(9,:) = [1, -1];
 
-% Collide
+[nodes,~] = size(f);
+feq = zeros(nodes,nodes,9);
 t1 = u.*u + v.*v;
 for k = 1:9
     t2 = c(k,1)*u + c(k,2)*v;
-    feq = w(k)*rho.*(1 + 3*t2 + 4.5*t2.^2 - 1.5*t1);
-    f(:,:,k) = omega*feq+(1-omega)*f(:,:,k);
+    feq(:,:,k) = w(k)*rho.*(1 + 3*t2 + 4.5*t2.^2 - 1.5*t1);
 end

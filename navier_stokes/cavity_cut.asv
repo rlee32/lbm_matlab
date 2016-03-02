@@ -35,13 +35,13 @@ L_p = 0.6;%1.1; % Cavity dimension.
 U_p = 6;%1.1; % Cavity lid velocity.
 nu_p = 1.2e-3;%1.586e-5; % Physical kinematic viscosity.
 rho0 = 1;
-cut_start_y = 0.4; % non-dimensional y-position on the west boundary.
-cut_end_x = 0.4; % non-dimensional x-position on the south boundary.
+cut_start_y = 0.11; % non-dimensional y-position on the west boundary.
+cut_end_x = 0.11; % non-dimensional x-position on the south boundary.
 % Discrete/numerical parameters.
 nodes = 100;
-dt = .004;
+dt = .002;
 timesteps = 10000;
-surfels = 40; % 'sruface elements', the number of cut surface elements attributed to the cut.
+surfels = 10; % 'sruface elements', the number of cut surface elements attributed to the cut.
 
 % Derived nondimensional parameters.
 Re = L_p * U_p / nu_p;
@@ -176,7 +176,7 @@ for iter = 1:timesteps
     % Modified from Jonas Latt's cavity code on the Palabos website.
     if (mod(iter,10)==0)
         uu = sqrt(u.^2+v.^2) / u_lb;
-        imagesc(flipud(uu));
+        imagesc(fl(uu));
         colorbar
         axis equal off; drawnow
     end

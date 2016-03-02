@@ -1,4 +1,4 @@
-function feq = compute_feq(f,rho,u,v)
+function feq = compute_feq(rho,u,v)
 
 w = zeros(9,1);
 w(1) = 4/9;
@@ -15,7 +15,7 @@ c(7,:) = [-1, 1];
 c(8,:) = [-1, -1];
 c(9,:) = [1, -1];
 
-[nodes,~] = size(f);
+[nodes,~] = size(rho);
 feq = zeros(nodes,nodes,9);
 t1 = u.*u + v.*v;
 for k = 1:9

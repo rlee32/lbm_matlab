@@ -14,8 +14,8 @@ for s = 1:size(weights,1)
     for t = 1:touched_cells
         i = round(surfel(t,1));
         j = round(surfel(t,2));
-        w = surfel(t,3);
-        G(s,k) = G(s,k) + w*f(i,j,ci(k));
+        overlap_area = surfel(t,4);
+        G(s,k) = G(s,k) + overlap_area*f(j,i,ci(k));
     end
   end
 end

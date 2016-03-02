@@ -6,7 +6,7 @@ function G = gather(f,weights,ci)
 % ci maps weights to f, by the proper component. ci(j) corresponds 
 %   to weights (k,j)
 
-gamma = zeros(size(weights,1),length(ci));
+G = zeros(size(weights,1),length(ci));
 for s = 1:size(weights,1)
   for k = 1:length(ci)
     surfel = weights{s,k};
@@ -15,7 +15,8 @@ for s = 1:size(weights,1)
         i = round(surfel(t,1));
         j = round(surfel(t,2));
         w = surfel(t,3);
-        gamma(s,k) = gamma(s,k) + w*f(i,j,ci(k));
+        a = surf
+        G(s,k) = G(s,k) + w*f(i,j,ci(k));
     end
   end
 end

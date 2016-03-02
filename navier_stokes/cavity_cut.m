@@ -1,4 +1,6 @@
-% UNDER CONSTRUCTION
+% Seems to be working stably!
+% May need special condition for cells that are both on the wall and cut.
+% Results look a little funny; like the cut is a sink.
 
 % Lid-driven cavity with a cut corner.
 % A Lattice Boltzmann D2Q9 solver.
@@ -35,13 +37,13 @@ L_p = 0.6;%1.1; % Cavity dimension.
 U_p = 6;%1.1; % Cavity lid velocity.
 nu_p = 1.2e-3;%1.586e-5; % Physical kinematic viscosity.
 rho0 = 1;
-cut_start_y = 0.4; % non-dimensional y-position on the west boundary.
-cut_end_x = 0.4; % non-dimensional x-position on the south boundary.
+cut_start_y = 0.1; % non-dimensional y-position on the west boundary.
+cut_end_x = 0.1; % non-dimensional x-position on the south boundary.
 % Discrete/numerical parameters.
 nodes = 100;
-dt = .004;
+dt = .003;
 timesteps = 10000;
-surfels = 40; % 'sruface elements', the number of cut surface elements attributed to the cut.
+surfels = 10; % 'sruface elements', the number of cut surface elements attributed to the cut.
 
 % Derived nondimensional parameters.
 Re = L_p * U_p / nu_p;
@@ -72,7 +74,7 @@ p0(:,1) = p0(:,1) + cut_end_x;
 v1 = parallel / surfels;
 v2 = -c_wall .* repmat(unit_normal,length(c_wall),1) * dt; % a v2 for every eligible lattice link.
 
-% Surfel and lattice check.
+% % Surfel and lattice check.
 % figure;
 % hold on;
 % plot_lattice_lines(nodes);
@@ -106,7 +108,6 @@ u(end,2:end-1) = u_lb;
 % Set f to feq
 f = compute_feq(rho,u,v);
 % Apply meso BCs.
-% f = freewall(f,areas,ci);
 f = moving_wall_bc(f,'north',u_lb);
 f = wall_bc(f,'south');
 f = wall_bc(f,'east');
@@ -152,12 +153,17 @@ for iter = 1:timesteps
     % Now, apply volumetric boundary condition.
     G = gather(f,weights,ci);
     f = zero_wall_cells(f,tc,ci);
-    f = scatter(f,G,weights,ci);
+    % Apply wall bc here to take care of the cells that touch both wall and
+    %   cut (only 2 cells total should be doing this).
+    f = wall_bc(f,'south');
+    f = wall_bc(f,'west');
+    f = scatter(f,G,weights,ci,dh);
 
     % Apply meso BCs.
     f = moving_wall_bc(f,'north',u_lb);
-    f = wall_bc(f,'south');
-    f = wall_bc(f,'east');
+    % Already applied during cut bc.
+%     f = wall_bc(f,'south');
+%     f = wall_bc(f,'east');
     f = wall_bc(f,'west');
     
     % Determine macro variables and apply macro BCs
@@ -171,12 +177,12 @@ for iter = 1:timesteps
     u(:,end) = 0;
     v(:,end) = 0;
 
-    
     % VISUALIZATION
     % Modified from Jonas Latt's cavity code on the Palabos website.
-    if (mod(iter,10)==0)
+    if (mod(iter,1)==0)
         uu = sqrt(u.^2+v.^2) / u_lb;
         imagesc(flipud(uu));
+%         imagesc(flipud(f(:,:,2)));
         colorbar
         axis equal off; drawnow
     end

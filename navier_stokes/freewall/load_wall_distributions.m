@@ -5,5 +5,7 @@ function f = load_wall_distributions(f,saved,ci)
 
 bi = bounceback_components(ci);
 for k = 1:size(saved,1)
-    f(saved(k,1),saved(k,2),bi) = reshape(saved(k,3:end),1,1,length(bi));
+    i = saved(k,1);
+    j = saved(k,2);
+    f(j,i,bi) = reshape(saved(k,3:end),1,1,length(bi));
 end

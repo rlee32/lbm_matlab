@@ -1,6 +1,6 @@
 function [bmin, bmax, imin, imax] = pgram_bounds(p0,v1,v2,dh)
 % returns the bottom left and top right coordinates of the 
-% cell points that make a box that enclose a pgram.
+% cell points that make a (rectangular) box that enclose a pgram.
 % p0,v1,v2: describes the pgram.
 % dh: lattice cell dimension.
 % imin: the indices of the cell whose bottom left corner is bmin.

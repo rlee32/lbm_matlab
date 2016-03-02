@@ -125,6 +125,7 @@ v(:,end) = 0;
 % Enforce cut corner bc.
 [f,rho,u,v] = zero_out_of_bounds(f,rho,u,v,lasts);
 
+
 % Main loop.
 disp(['Running ' num2str(timesteps) ' timesteps...']);
 for iter = 1:timesteps
@@ -143,16 +144,17 @@ for iter = 1:timesteps
 
     % Streaming.
     % save cut corner distributions.
-    saved = save_wall_distributions(f,tc,ci);
+%     saved = save_wall_distributions(f,tc,ci);
+    f = preload_inactive_cells(f,lasts);
     f = stream(f);
     % load (the saved) cut corner distributions.
-    f = load_wall_distributions(f,saved,ci);
+%     f = load_wall_distributions(f,saved,ci);
     % zero inactive cells.
     [f,~,~,~] = zero_out_of_bounds(f,rho,u,v,lasts);
     
     % Now, apply volumetric boundary condition.
     G = gather(f,weights,ci);
-    f = zero_wall_cells(f,tc,ci);
+%     f = zero_wall_cells(f,tc,ci);
     % Apply wall bc here to take care of the cells that touch both wall and
     %   cut (only 2 cells total should be doing this).
     f = wall_bc(f,'south');

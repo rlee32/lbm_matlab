@@ -1,4 +1,9 @@
-% UNDER CONSTRUCTION
+% First version working (only steady, non-advected body force contribution)
+%   Steady, non-advected body force distribution allows more stability.
+%   Tested at Re=1e5.
+% Advecting the body force term can give better results.
+% including implicit body force disbution term would be more demanding,
+%   calling for an implicit procedure.
 
 % A Lattice Boltzmann Multiple Relaxation Time D2Q9 solver,
 % with Viscosity Counteraction (Steady approximation), 
@@ -29,14 +34,14 @@ addpath vc
 
 % Physical parameters.
 L_p = 2.5; %1.1; % Cavity dimension. 
-U_p = 10; %1.1; % Cavity lid velocity.
+U_p = 50; %1.1; % Cavity lid velocity.
 nu_p = 1.2e-3; % 1.586e-5; % Physical kinematic viscosity.
 rho0 = 1;
 % Discrete/numerical parameters.
-nu_c_f = 0; % multiplier of nu_lb (discrete viscosity); nu_lb*nu_c_f = nu_c 
+nu_c_f = 3; % multiplier of nu_lb (discrete viscosity); nu_lb*nu_c_f = nu_c 
               % stabilizing parameter; viscosity "buffer".
 nodes = 100;
-dt = .002;
+dt = .004;
 timesteps = 10000;
 
 % Derived nondimensional parameters.

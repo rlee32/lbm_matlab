@@ -116,9 +116,8 @@ u(:,1) = 0;
 v(:,1) = 0;
 u(:,end) = 0;
 v(:,end) = 0;
+% Enforce cut corner bc.
 [f,rho,u,v] = zero_out_of_bounds(f,rho,u,v,lasts);
-saved = save_wall_distributions(f,tc,ci);
-f = load_wall_distributions(f,saved,ci);
 
 % Main loop.
 disp(['Running ' num2str(timesteps) ' timesteps...']);
@@ -137,8 +136,18 @@ for iter = 1:timesteps
     f = wall_bc(f,'west');
 
     % Streaming.
+    % save cut corner distributions.
+    saved = save_wall_distributions(f,tc,ci);
     f = stream(f);
+    % load (the saved) cut corner distributions.
+    f = load_wall_distributions(f,saved,ci);
+    % zero inactive cells.
+    [f,~,~,~] = zero_out_of_bounds(f,rho,u,v,lasts);
     
+    % Now, apply volumetric boundary condition.
+    G = gather(f,weights,ci);
+    f = scatter(f,G,weights,ci);
+
     % Apply meso BCs.
     f = moving_wall_bc(f,'north',u_lb);
     f = wall_bc(f,'south');
@@ -155,6 +164,7 @@ for iter = 1:timesteps
     v(:,1) = 0;
     u(:,end) = 0;
     v(:,end) = 0;
+
     
     % VISUALIZATION
     % Modified from Jonas Latt's cavity code on the Palabos website.

@@ -2,19 +2,18 @@ function gamma = gather(f,weights,ci)
 % computes the agglomerated distribution function for the volumetric 
 %   boundary condition for each surfel.
 % weights: assigned weights for each surfel as a 2d cell array:
-%   surfels x components of touched_cells x 3 (i,j,weight)
+%   surfels x components of touched_cells x 3 (i,j,weight,pgram_gamma)
 % ci maps weights to f, by the proper component. ci(j) corresponds 
 %   to weights (k,j)
 
-gamma = zeros(size(weights,1),length(ci));
 for s = 1:size(weights,1)
+  surfel = weights{s,:};
   for k = 1:length(ci)
-    surfel = weights{s,k};
-    touched_cells = size(surfel,1);
+    touched_cells = size(surfel{k},1);
     for t = 1:touched_cells
-        i = round(surfel(t,1));
-        j = round(surfel(t,2));
-        gamma(s,k) = gamma(s,k) + surfel(t,3)*f(i,j,ci(k));
+        i = round(surfel{k}(t,1));
+        j = round(surfel{k}(t,2));
+        f(i,j,ci(k)) = f(i,j,ci(k)) + surfel{k}(t,3)*;
     end
   end
 end

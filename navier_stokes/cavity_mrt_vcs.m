@@ -29,11 +29,11 @@ addpath vc
 
 % Physical parameters.
 L_p = 2.5; %1.1; % Cavity dimension. 
-U_p = 5; %1.1; % Cavity lid velocity.
+U_p = 10; %1.1; % Cavity lid velocity.
 nu_p = 1.2e-3; % 1.586e-5; % Physical kinematic viscosity.
 rho0 = 1;
 % Discrete/numerical parameters.
-nu_c_f = 2; % multiplier of nu_lb (discrete viscosity); nu_lb*nu_c_f = nu_c 
+nu_c_f = 0; % multiplier of nu_lb (discrete viscosity); nu_lb*nu_c_f = nu_c 
               % stabilizing parameter; viscosity "buffer".
 nodes = 100;
 dt = .002;

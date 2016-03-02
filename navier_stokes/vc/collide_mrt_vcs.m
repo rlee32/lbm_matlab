@@ -52,9 +52,10 @@ deltam(:,:,9) = deltam(:,:,9) - rho.*u.*v;
 
 
 % Viscosity counteraction term.
-[Fx,Fy] = body_force(f,compute_feq(f,rho,u,v),om,nu_c,dh);
-bfg = compute_g(Fx,Fy,u,v);
-
+if nu_c > 0
+    [Fx,Fy] = body_force(f,compute_feq(f,rho,u,v),om,nu_c,dh);
+    bfg = compute_g(Fx,Fy,u,v);
+end
 
 
 
@@ -64,7 +65,9 @@ for k = 1:9
         f(:,:,k) =  f(:,:,k) ...
             - MinvS(k,n) * deltam(:,:,n);
     end
-    f(:,:,k) = f(:,:,k) + dt*bfg(:,:,k);
+    if nu_c > 0
+        f(:,:,k) = f(:,:,k) + dt*bfg(:,:,k); 
+    end
 end
 
 

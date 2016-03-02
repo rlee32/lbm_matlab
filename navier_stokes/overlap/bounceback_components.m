@@ -2,7 +2,7 @@ function bounced = bounceback_components(components)
 % components: D2Q9 velocity indices
 % bounced: corresponding bounce-back indices.
 
-bounced = zeros(length(components,1));
+bounced = zeros(length(components),1);
 for k = 1:length(components)
     if components(k) == 2
         bounced(k) = 4;

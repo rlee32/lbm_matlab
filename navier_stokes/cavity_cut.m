@@ -24,6 +24,12 @@ addpath bc
 %   Apply meso BCs?
 %   Determine macro variables and apply macro BCs
 
+% To handle the cut cell bc, we:
+%   1. Save the wall distributions that would come from inside the wall.
+%   2. Advect
+%   3. Zero the inner distributions (meso and macro scopically).
+%   4. load the saved wall distributions.
+
 % Physical parameters.
 L_p = 0.6;%1.1; % Cavity dimension. 
 U_p = 6;%1.1; % Cavity lid velocity.
@@ -77,8 +83,12 @@ for lv = 1:considered
         plot_bounding_box(bmin,bmax);
     end
 end
+plot([cut_end_x,0],[0,cut_start_y]); 
+ 
+weights = surfel_weights(p0,v1,v2,dh); 
 
-weights = surfel_weights(p0,v1,v2,dh);
+% get the touched cells, so we can save their prestreaming distributions.
+[tc, lasts] = touched_cells([cut_end_x,0;0,cut_start_y],dh);
 
 % % VISUALIZATION
 % % Modified from Jonas Latt's cavity code on the Palabos website.
@@ -89,6 +99,7 @@ weights = surfel_weights(p0,v1,v2,dh);
 
 % Initialize.
 f = ones(nodes,nodes,9);
+
 % Apply meso BCs.
 % f = freewall(f,areas,ci);
 f = moving_wall_bc(f,'north',u_lb);
@@ -105,6 +116,9 @@ u(:,1) = 0;
 v(:,1) = 0;
 u(:,end) = 0;
 v(:,end) = 0;
+[f,rho,u,v] = zero_out_of_bounds(f,rho,u,v,lasts);
+saved = save_wall_distributions(f,tc,ci);
+f = load_wall_distributions(f,saved,ci);
 
 % Main loop.
 disp(['Running ' num2str(timesteps) ' timesteps...']);

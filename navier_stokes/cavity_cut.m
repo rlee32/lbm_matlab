@@ -1,6 +1,9 @@
-% Seems to be working stably!
-% May need special condition for cells that are both on the wall and cut.
-% Results look a little funny; like the cut is a sink.
+% UNDER CONSTRUCTION
+% The dynamic behavior of the distributions and pgrams are hard to capture
+%   with MATLAB script... unless I simplify the cuts considerably. Even
+%   then, it is still quite a job.
+% This may remain defunct (and I may instead implement this in C++ using
+%   object-oriented techniques).
 
 % Lid-driven cavity with a cut corner.
 % A Lattice Boltzmann D2Q9 solver.
@@ -147,7 +150,7 @@ for iter = 1:timesteps
     % Streaming.
     % save cut corner distributions.
 %     saved = save_wall_distributions(f,tc,ci);
-    f = preload_inactive_cells(f,lasts);
+%     f = preload_inactive_cells(f,lasts);
     f = stream(f);
     % load (the saved) cut corner distributions.
 %     f = load_wall_distributions(f,saved,ci);

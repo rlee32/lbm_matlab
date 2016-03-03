@@ -1,4 +1,4 @@
-function sw = surfel_weights(p0,v1,v2,dh)
+function sw = surfel_weights(p0,v1,v2,dh,tc)
 % Catered to lid driven cavity case.
 % returns a 2d cell array, where each row corresponds to a surfel, and 
 %   each column corresponds to the pgrams
@@ -21,10 +21,21 @@ for r = 1:nsurfels
     for c = 1:nvectors
         pgram_area = norm(cross([v1,0],[v2(c,:),0]),2);
         pw = pgram_weights(p0(r,:),v1,v2(c,:),dh);
-        pw(1,4) = 0;
+        pw(1,5) = 0;
         sw{r,c} = pw;
         sw{r,c}(:,4) = sw{r,c}(:,3);
         sw{r,c}(:,3) = sw{r,c}(:,3) / pgram_area;
+        for k = 1:size(pw,1)
+            cell_fluid_area = tc(tc(:,1) == pw(k,1),:);
+            cell_fluid_area = cell_fluid_area(cell_fluid_area(:,2) == pw(k,2),3);
+            if isempty(cell_fluid_area)
+                cell_fluid_area = dh^2;
+            end
+            sw{r,c}(k,5) = cell_fluid_area;
+        end
+        if size(cell_fluid_area) < 1
+            disp('Error!!! cell area not found!');
+        end
     end
 end
     

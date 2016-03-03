@@ -1,9 +1,7 @@
-function f = scatter(f, G, weights, ci, dh)
+function f = scatter(f, G, weights, ci)
 % distributes particles to f according to G.
 % G is a number of particles, not a distribution (which is number of 
 %   particles normalized by volume).
-
-cell_area = dh^2;
 
 bi = bounceback_components(ci);
 for s = 1:size(weights,1)
@@ -14,7 +12,8 @@ for s = 1:size(weights,1)
         i = round(surfel(t,1));
         j = round(surfel(t,2));
         w = surfel(t,3);
-        f(j,i,bi(k)) = f(j,i,bi(k)) + w*G(s,k) / cell_area;
+        cell_fluid_area = surfel(t,5);
+        f(j,i,bi(k)) = f(j,i,bi(k)) + w*G(s,k) / cell_fluid_area;
     end
   end
 end

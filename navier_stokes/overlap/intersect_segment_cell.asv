@@ -20,8 +20,7 @@ if intersected
 else
     intersect = 1;
 end
-% check for the case of the intersection being totally outside fluid
-%   domain.
+% check for the case of the intersection 
 if intersected
     segment = [p0; p0+ray];
     points = cell_intersections(segment,cmin,dh);

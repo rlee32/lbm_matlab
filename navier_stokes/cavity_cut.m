@@ -74,24 +74,25 @@ p0(:,1) = p0(:,1) + cut_end_x;
 v1 = parallel / surfels;
 v2 = -c_wall .* repmat(unit_normal,length(c_wall),1) * dt; % a v2 for every eligible lattice link.
 
-% % Surfel and lattice check.
-% figure;
-% hold on;
-% plot_lattice_lines(nodes);
-% [considered, ~] = size(c_wall);
-% for lv = 1:considered
-%     for k = 1:2:surfels
-%         plot_surfel(p0(k,:), v1, v2(lv,:));
-%         [bmin, bmax, imin, imax] = pgram_bounds(p0(k,:), v1, v2(lv,:),dh);
-%         plot_bounding_box(bmin,bmax);
-%     end
-% end
-% plot([cut_end_x,0],[0,cut_start_y]); 
+% Surfel and lattice check.
+figure;
+hold on;
+plot_lattice_lines(nodes);
+[considered, ~] = size(c_wall);
+for lv = 1:considered
+    for k = 1:2:surfels
+        plot_surfel(p0(k,:), v1, v2(lv,:));
+        [bmin, bmax, imin, imax] = pgram_bounds(p0(k,:), v1, v2(lv,:),dh);
+        plot_bounding_box(bmin,bmax);
+    end
+end
+plot([cut_end_x,0],[0,cut_start_y]); 
  
 weights = surfel_weights(p0,v1,v2,dh); 
 
 % get the touched cells, so we can save their prestreaming distributions.
-[tc, lasts] = touched_cells([cut_end_x,0;0,cut_start_y],dh);
+[tc, lasts] = touched_cells([cut_end_x,0;0,cut_start_y],dh, ...
+    cut_start_y,cut_end_x);
 
 % % VISUALIZATION
 % % Modified from Jonas Latt's cavity code on the Palabos website.

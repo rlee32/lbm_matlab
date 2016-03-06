@@ -10,6 +10,7 @@ clear;close all;clc;
 
 addpath basic
 addpath bc
+addpath turbulence
 
 % Algorithm steps:
 % Initialize meso (f)
@@ -111,6 +112,7 @@ for iter = 1:timesteps
         uu = sqrt(u.^2+v.^2) / u_lb;
 %         imagesc(flipud(uu));
         imagesc(flipud(nut));
+%         imagesc(flipud(omega));
         colorbar
         axis equal off; drawnow
     end

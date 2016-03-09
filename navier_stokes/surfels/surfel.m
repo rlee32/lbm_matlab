@@ -25,7 +25,7 @@ classdef surfel < handle
                 ];      
     end
     methods
-        function obj = surfel_lattice(startp, endp, dh, dt)
+        function obj = surfel(startp, endp, dh, dt)
             % assumes a lattice grid, with uniform spacing dh, 
             % so that the touched cells can be determined from segment
             % defined by startp and endp.
@@ -38,10 +38,12 @@ classdef surfel < handle
             valid_lattice_directions(obj);
             % Now let us (newly) make the pgrams associated with this
             % surfel.
-            obj.pgrams = zeros(length(obj.lattice_indices),1);
+            obj.pgrams = []; % zeros(length(obj.lattice_indices),1);
             for k = 1:length(obj.lattice_indices)
                 extrusion = dt*obj.c(k,:)';
-                obj.pgrams(k) = pgram(obj.startp, obj.segment, extrusion, dh);
+                % obj.pgrams(k) = pgram(obj.startp, obj.segment, extrusion, dh);
+                obj.pgrams = [obj.pgrams, ...
+                    pgram(obj.startp, obj.segment, extrusion, dh)];
             end
         end
     end

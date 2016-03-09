@@ -97,9 +97,12 @@ plot([cut_end_x,0],[0,cut_start_y]);
 %     cut_start_y,cut_end_x);
 tc = find_cut_cells([cut_end_x,0;0,cut_start_y],dh, ...
     cut_start_y,cut_end_x);
+% lets get the surfel objects, which contain pgrams and touched_cells.
+ss = generate_surfels(p0,v1,dt,dh,tc);
 
-% all-important weights for bc enforcement...
+% all-important weights for bc enforcement... 
 weights = surfel_weights(p0,v1,v2,dh,tc); 
+
 
 % % VISUALIZATION
 % % Modified from Jonas Latt's cavity code on the Palabos website.

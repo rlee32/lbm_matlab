@@ -18,7 +18,9 @@ nvectors = size(v2,1);
 
 sw = cell(nsurfels,nvectors);
 for r = 1:nsurfels
+    % for every surfel
     for c = 1:nvectors
+        % for every lattice direction
         pgram_area = norm(cross([v1,0],[v2(c,:),0]),2);
         pw = pgram_weights(p0(r,:),v1,v2(c,:),dh);
         pw(1,5) = 0;

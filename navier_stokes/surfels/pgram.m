@@ -21,8 +21,7 @@ classdef pgram < handle
             obj.extrusion = extrusion;
             
             compute_area(obj, surface, extrusion);
-            determine_weights(obj,dh);
-            
+            determine_weights(obj,dh);            
         end
 %         function [fd, cell_indices] = distribute_particles(obj)
 %             for k = 1:length(obj.touched_cells)

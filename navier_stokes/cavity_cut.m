@@ -76,7 +76,9 @@ unit_normal = [-parallel(1), parallel(2)] / cut_length;
 p0 = (0:surfels-1)' * cut_length / surfels * unit_parallel;
 p0(:,1) = p0(:,1) + cut_end_x;
 v1 = parallel / surfels;
-v2 = -c_wall .* repmat(unit_normal,length(c_wall),1) * dt; % a v2 for every eligible lattice link.
+% v2 = -c_wall .* repmat(unit_normal,length(c_wall),1) * dt; % a v2 for every eligible lattice link.
+v2 = -c_wall * dt; % a v2 for every eligible lattice link.
+
 
 % Surfel and lattice check.
 figure;
@@ -102,7 +104,6 @@ ss = generate_surfels(p0,v1,dt,dh,tc);
 
 % all-important weights for bc enforcement... 
 weights = surfel_weights(p0,v1,v2,dh,tc); 
-
 
 % % VISUALIZATION
 % % Modified from Jonas Latt's cavity code on the Palabos website.

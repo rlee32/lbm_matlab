@@ -40,7 +40,7 @@ classdef surfel < handle
             % surfel.
             obj.pgrams = []; % zeros(length(obj.lattice_indices),1);
             for k = 1:length(obj.lattice_indices)
-                extrusion = dt*obj.c(k,:)';
+                extrusion = -dt*obj.c(obj.lattice_indices(k),:)';
                 % obj.pgrams(k) = pgram(obj.startp, obj.segment, extrusion, dh);
                 obj.pgrams = [obj.pgrams, ...
                     pgram(obj.startp, obj.segment, extrusion, dh)];
@@ -51,7 +51,7 @@ classdef surfel < handle
         function valid_lattice_directions(obj)
             valid = zeros(9,1);
             for k = 1:9
-                valid(k) = dot(obj.normal,obj.c(k,:)) < 0;
+                valid(k) = dot(obj.normal,obj.c(k,:)) < -eps;
             end
             obj.lattice_indices = find(valid==1); % the components relevant to wall.
 %             obj.lattice_vectors = obj.c( valid == 1 , : );

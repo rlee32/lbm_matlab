@@ -140,6 +140,7 @@ v(:,end) = 0;
 
 collect(ss,f,fluid_areas);
 scatter(ss,f,fluid_areas);
+area_scale_distributions(f, fluid_areas);
 
 % Main loop.
 disp(['Running ' num2str(timesteps) ' timesteps...']);

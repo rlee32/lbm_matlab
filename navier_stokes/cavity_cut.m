@@ -80,19 +80,19 @@ v1 = parallel / surfels;
 v2 = -c_wall * dt; % a v2 for every eligible lattice link.
 
 
-% Surfel and lattice check.
-figure;
-hold on;
-plot_lattice_lines(nodes);
-[considered, ~] = size(c_wall);
-for lv = 1:considered
-    for k = 1:2:surfels
-        plot_surfel(p0(k,:), v1, v2(lv,:));
-        [bmin, bmax, imin, imax] = pgram_bounds(p0(k,:), v1, v2(lv,:),dh);
-        plot_bounding_box(bmin,bmax);
-    end
-end
-plot([cut_end_x,0],[0,cut_start_y]); 
+% % Surfel and lattice check.
+% figure;
+% hold on;
+% plot_lattice_lines(nodes);
+% [considered, ~] = size(c_wall);
+% for lv = 1:considered
+%     for k = 1:2:surfels
+%         plot_surfel(p0(k,:), v1, v2(lv,:));
+%         [bmin, bmax, imin, imax] = pgram_bounds(p0(k,:), v1, v2(lv,:),dh);
+%         plot_bounding_box(bmin,bmax);
+%     end
+% end
+% plot([cut_end_x,0],[0,cut_start_y]); 
 
 % get the touched cells, so we can save their prestreaming distributions.
 % [tc, lasts] = find_touched_cells([cut_end_x,0;0,cut_start_y],dh, ...
@@ -138,9 +138,6 @@ v(:,end) = 0;
 % Enforce cut corner bc.
 % [f,rho,u,v] = zero_out_of_bounds(f,rho,u,v,lasts);
 
-collect(ss,f,fluid_areas);
-scatter(ss,f,fluid_areas);
-area_scale_distributions(f, fluid_areas);
 
 % Main loop.
 disp(['Running ' num2str(timesteps) ' timesteps...']);
@@ -162,26 +159,31 @@ for iter = 1:timesteps
     % save cut corner distributions.
 %     saved = save_wall_distributions(f,tc,ci);
 %     f = preload_inactive_cells(f,lasts);
+
+%     collect(ss,f,fluid_areas);
     f = stream(f);
+%     area_scale_distributions(f, fluid_areas);
+%     scatter(ss,f,fluid_areas);
+    
     % load (the saved) cut corner distributions.
 %     f = load_wall_distributions(f,saved,ci);
     % zero inactive cells.
-    [f,~,~,~] = zero_out_of_bounds(f,rho,u,v,lasts);
+%     [f,~,~,~] = zero_out_of_bounds(f,rho,u,v,lasts);
     
-    % Now, apply volumetric boundary condition.
-    G = gather(f,weights,ci);
-    f = zero_wall_cells(f,tc,ci);
-    % Apply wall bc here to take care of the cells that touch both wall and
-    %   cut (only 2 cells total should be doing this).
-    f = wall_bc(f,'south');
-    f = wall_bc(f,'west');
-    f = scatter(f,G,weights,ci);
+%     % OLD
+%     % Now, apply volumetric boundary condition.
+%     G = gather(f,weights,ci);
+%     f = zero_wall_cells(f,tc,ci);
+%     % Apply wall bc here to take care of the cells that touch both wall and
+%     %   cut (only 2 cells total should be doing this).
+%     f = wall_bc(f,'south');
+%     f = wall_bc(f,'west');
+%     f = scatter(f,G,weights,ci);
 
     % Apply meso BCs.
     f = moving_wall_bc(f,'north',u_lb);
-    % Already applied during cut bc.
-%     f = wall_bc(f,'south');
-%     f = wall_bc(f,'east');
+    f = wall_bc(f,'south');
+    f = wall_bc(f,'east');
     f = wall_bc(f,'west');
     
     % Determine macro variables and apply macro BCs

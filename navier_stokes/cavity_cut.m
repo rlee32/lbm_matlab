@@ -41,13 +41,13 @@ L_p = 0.6;%1.1; % Cavity dimension.
 U_p = 6;%1.1; % Cavity lid velocity.
 nu_p = 1.2e-3;%1.586e-5; % Physical kinematic viscosity.
 rho0 = 1;
-cut_start_y = 0.5; % non-dimensional y-position on the west boundary.
-cut_end_x = 0.5; % non-dimensional x-position on the south boundary.
+cut_start_y = 0.1; % non-dimensional y-position on the west boundary.
+cut_end_x = 0.1; % non-dimensional x-position on the south boundary.
 % Discrete/numerical parameters.
 nodes = 100;
 dt = .003;
 timesteps = 10000;
-surfels = 50; % 'surface elements', the number of cut surface elements attributed to the cut.
+surfels = 10; % 'surface elements', the number of cut surface elements attributed to the cut.
 
 % Derived nondimensional parameters.
 Re = L_p * U_p / nu_p;
@@ -97,10 +97,13 @@ v2 = -c_wall * dt; % a v2 for every eligible lattice link.
 % get the touched cells, so we can save their prestreaming distributions.
 % [tc, lasts] = find_touched_cells([cut_end_x,0;0,cut_start_y],dh, ...
 %     cut_start_y,cut_end_x);
+disp('Finding cut cells');
 tc = find_cut_cells([cut_end_x,0;0,cut_start_y],dh, ...
     cut_start_y,cut_end_x);
+disp('Finding fluid areas');
 fluid_areas = fluid_areas_table(tc, nodes, dh);
 % lets get the surfel objects, which contain pgrams and touched_cells.
+disp('Generating surfels');
 ss = generate_surfels(p0,v1,dt,dh,tc);
 
 % all-important weights for bc enforcement... 
@@ -160,10 +163,10 @@ for iter = 1:timesteps
 %     saved = save_wall_distributions(f,tc,ci);
 %     f = preload_inactive_cells(f,lasts);
 
-    collect(ss,f,fluid_areas);
+    f = collect(ss,f,fluid_areas);
     f = stream(f);
-    area_scale_distributions(f, fluid_areas);
-    scatter(ss,f,fluid_areas);
+    f = area_scale_distributions(f, fluid_areas);
+    f = scatter(ss,f,fluid_areas);
     
     % load (the saved) cut corner distributions.
 %     f = load_wall_distributions(f,saved,ci);

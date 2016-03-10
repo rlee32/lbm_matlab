@@ -24,7 +24,7 @@ classdef pgram < handle
             compute_area(obj, surface, extrusion);
             determine_weights(obj,dh);            
         end
-        function collect(obj, f, fluid_areas)
+        function f = collect(obj, f, fluid_areas)
             obj.collected_particles = 0;
             for k = 1:length(obj.celli)
                 ff = f(obj.cellj(k), obj.celli(k), obj.lattice_index);
@@ -39,7 +39,7 @@ classdef pgram < handle
                     fa;
             end
         end
-        function scatter(obj, f, fluid_areas)
+        function f = scatter(obj, f, fluid_areas)
             for k = 1:length(obj.celli)
                 opposite_index = opposite_lattice_index(obj);
                 ff = f(obj.cellj(k), obj.celli(k), opposite_index);

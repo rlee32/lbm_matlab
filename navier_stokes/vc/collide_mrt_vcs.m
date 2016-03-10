@@ -53,7 +53,7 @@ deltam(:,:,9) = deltam(:,:,9) - rho.*u.*v;
 
 % Viscosity counteraction term.
 if nu_c > 0
-    [Fx,Fy] = body_force(f,compute_feq(f,rho,u,v),om,nu_c,dh);
+    [Fx,Fy] = body_force(f,compute_feq(rho,u,v),om,nu_c,dh);
     bfg = compute_g(Fx,Fy,u,v);
 end
 

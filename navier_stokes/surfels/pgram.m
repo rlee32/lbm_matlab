@@ -4,7 +4,7 @@ classdef pgram < handle
         surface                 % the surface vector associated with this pgram.
         extrusion               % the vector describing the extrusion of 
                                 % the surface into the fluid domain.
-%         lattice_index           % the lattice velocity index that pgram corresponds to.
+        lattice_index           % the lattice velocity index that pgram corresponds to.
         area                    % area of this pgram. Equals magnitude of 
                                 % cross(surface, extrusion).
         celli                   % cell i indices touched by this pgram.
@@ -15,13 +15,42 @@ classdef pgram < handle
         collected_particles     % collected particles in this pgram.
     end
     methods
-        function obj = pgram(p0, surface, extrusion, dh)
+        function obj = pgram(p0, surface, extrusion, lattice_index, dh)
             obj.p0 = p0;
             obj.surface = surface;
             obj.extrusion = extrusion;
+            obj.lattice_index = lattice_index;
             
             compute_area(obj, surface, extrusion);
             determine_weights(obj,dh);            
+        end
+        function collect(obj, f, fluid_areas)
+            obj.collected_particles = 0;
+            for k = 1:length(obj.celli)
+                ff = f(obj.cellj(k), obj.celli(k), obj.lattice_index);
+                fa = fluid_areas(obj.cellj(k), obj.celli(k));
+                cell_particles = ff * fa;
+                taken_particles = obj.weights(k) * cell_particles;
+                obj.collected_particles = obj.collected_particles + ...
+                    taken_particles;
+                % update distribution
+                f(obj.cellj(k), obj.celli(k), obj.lattice_index) = ...
+                    ( cell_particles - taken_particles ) / ...
+                    fa;
+            end
+        end
+        function scatter(obj, f, fluid_areas)
+            for k = 1:length(obj.celli)
+                opposite_index = opposite_lattice_index(obj);
+                ff = f(obj.cellj(k), obj.celli(k), opposite_index);
+                fa = fluid_areas(obj.cellj(k), obj.celli(k));
+                cell_particles = ff * fa;
+                scatter_particles = obj.weights(k) * ...
+                    obj.collected_particles;
+                % update distribution
+                f(obj.cellj(k), obj.celli(k), opposite_index) = ...
+                    ( cell_particles + scatter_particles ) / fa;
+            end
         end
 %         function [fd, cell_indices] = distribute_particles(obj)
 %             for k = 1:length(obj.touched_cells)
@@ -97,6 +126,32 @@ classdef pgram < handle
 %                             touched_cell( i, j, 0 )];
                     end
                 end
+            end
+        end
+        function bounced = opposite_lattice_index(obj)
+            if obj.lattice_index == 2
+                bounced = 4;
+            end
+            if obj.lattice_index == 3
+                bounced = 5;
+            end
+            if obj.lattice_index == 4
+                bounced = 2;
+            end
+            if obj.lattice_index == 5
+                bounced = 3;
+            end
+            if obj.lattice_index == 6
+                bounced = 8;
+            end
+            if obj.lattice_index == 7
+                bounced = 9;
+            end
+            if obj.lattice_index == 8
+                bounced = 6;
+            end
+            if obj.lattice_index == 9
+                bounced = 7;
             end
         end
     end

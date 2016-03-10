@@ -43,7 +43,8 @@ classdef surfel < handle
                 extrusion = -dt*obj.c(obj.lattice_indices(k),:)';
                 % obj.pgrams(k) = pgram(obj.startp, obj.segment, extrusion, dh);
                 obj.pgrams = [obj.pgrams, ...
-                    pgram(obj.startp, obj.segment, extrusion, dh)];
+                    pgram(obj.startp, obj.segment, extrusion, ...
+                        obj.lattice_indices(k), dh)];
             end
         end
     end

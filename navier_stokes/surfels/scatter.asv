@@ -1,0 +1,4 @@
+function scatter()
+% Scatters the particle collections in each pgram of each surfel to the
+% corresponding 
+    

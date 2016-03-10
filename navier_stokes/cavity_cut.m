@@ -99,11 +99,12 @@ plot([cut_end_x,0],[0,cut_start_y]);
 %     cut_start_y,cut_end_x);
 tc = find_cut_cells([cut_end_x,0;0,cut_start_y],dh, ...
     cut_start_y,cut_end_x);
+fluid_areas = fluid_areas_table(tc, nodes, dh);
 % lets get the surfel objects, which contain pgrams and touched_cells.
 ss = generate_surfels(p0,v1,dt,dh,tc);
 
 % all-important weights for bc enforcement... 
-weights = surfel_weights(p0,v1,v2,dh,tc); 
+% weights = surfel_weights(p0,v1,v2,dh,tc); 
 
 % % VISUALIZATION
 % % Modified from Jonas Latt's cavity code on the Palabos website.
@@ -135,8 +136,10 @@ v(:,1) = 0;
 u(:,end) = 0;
 v(:,end) = 0;
 % Enforce cut corner bc.
-[f,rho,u,v] = zero_out_of_bounds(f,rho,u,v,lasts);
+% [f,rho,u,v] = zero_out_of_bounds(f,rho,u,v,lasts);
 
+collect(ss,f,fluid_areas);
+scatter(ss,f,fluid_areas);
 
 % Main loop.
 disp(['Running ' num2str(timesteps) ' timesteps...']);

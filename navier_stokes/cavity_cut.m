@@ -160,10 +160,10 @@ for iter = 1:timesteps
 %     saved = save_wall_distributions(f,tc,ci);
 %     f = preload_inactive_cells(f,lasts);
 
-%     collect(ss,f,fluid_areas);
+    collect(ss,f,fluid_areas);
     f = stream(f);
-%     area_scale_distributions(f, fluid_areas);
-%     scatter(ss,f,fluid_areas);
+    area_scale_distributions(f, fluid_areas);
+    scatter(ss,f,fluid_areas);
     
     % load (the saved) cut corner distributions.
 %     f = load_wall_distributions(f,saved,ci);

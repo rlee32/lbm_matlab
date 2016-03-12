@@ -80,19 +80,19 @@ v1 = parallel / surfels;
 v2 = -c_wall * dt; % a v2 for every eligible lattice link.
 
 
-% % Surfel and lattice check.
-% figure;
-% hold on;
-% plot_lattice_lines(nodes);
-% [considered, ~] = size(c_wall);
-% for lv = 1:considered
-%     for k = 1:2:surfels
-%         plot_surfel(p0(k,:), v1, v2(lv,:));
-%         [bmin, bmax, imin, imax] = pgram_bounds(p0(k,:), v1, v2(lv,:),dh);
-%         plot_bounding_box(bmin,bmax);
-%     end
-% end
-% plot([cut_end_x,0],[0,cut_start_y]); 
+% Surfel and lattice check.
+figure;
+hold on;
+plot_lattice_lines(nodes);
+[considered, ~] = size(c_wall);
+for lv = 1:considered
+    for k = 1:2:surfels
+        plot_surfel(p0(k,:), v1, v2(lv,:));
+        [bmin, bmax, imin, imax] = pgram_bounds(p0(k,:), v1, v2(lv,:),dh);
+        plot_bounding_box(bmin,bmax);
+    end
+end
+plot([cut_end_x,0],[0,cut_start_y]); 
 
 % get the touched cells, so we can save their prestreaming distributions.
 % [tc, lasts] = find_touched_cells([cut_end_x,0;0,cut_start_y],dh, ...
@@ -104,7 +104,7 @@ disp('Finding fluid areas');
 fluid_areas = fluid_areas_table(tc, nodes, dh);
 % lets get the surfel objects, which contain pgrams and touched_cells.
 disp('Generating surfels');
-ss = generate_surfels(p0,v1,dt,dh,tc);
+ss = generate_surfels(p0,v1,dt,dh);
 
 % all-important weights for bc enforcement... 
 % weights = surfel_weights(p0,v1,v2,dh,tc); 
@@ -141,6 +141,8 @@ v(:,end) = 0;
 % Enforce cut corner bc.
 % [f,rho,u,v] = zero_out_of_bounds(f,rho,u,v,lasts);
 
+% ad hoc bounced back indices for 45 degree cut.
+bounced = [2, 3, 6];
 
 % Main loop.
 disp(['Running ' num2str(timesteps) ' timesteps...']);

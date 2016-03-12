@@ -15,12 +15,12 @@ classdef touched_cell
             obj.j = j;
             obj.fluid_area = fluid_area;
         end
-        function fa = advected_particles(obj, f)
-            fa = f(obj.j,obj.i,obj.k) * obj.non_overlap_area;
-        end
-        function [fc, pgram_indices] = collected_particles(obj, f, pgrams)
-            fc = f(obj.j,obj.i,obj.k) * obj.overlap_areas;
-            pgram_indices = pgrams;
-        end
+%         function fa = advected_particles(obj, f)
+%             fa = f(obj.j,obj.i,obj.k) * obj.non_overlap_area;
+%         end
+%         function [fc, pgram_indices] = collected_particles(obj, f, pgrams)
+%             fc = f(obj.j,obj.i,obj.k) * obj.overlap_areas;
+%             pgram_indices = pgrams;
+%         end
     end
 end

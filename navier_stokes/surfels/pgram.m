@@ -30,7 +30,8 @@ classdef pgram < handle
                 ff = f(obj.cellj(k), obj.celli(k), obj.lattice_index);
                 fa = fluid_areas(obj.cellj(k), obj.celli(k));
                 cell_particles = ff * fa;
-                taken_particles = obj.weights(k) * cell_particles;
+                overlapped = obj.weights(k) * obj.area / fa;
+                taken_particles = overlapped * cell_particles;
                 obj.collected_particles = obj.collected_particles + ...
                     taken_particles;
                 % update distribution

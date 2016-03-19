@@ -18,6 +18,7 @@ addpath freewall
 addpath basic
 addpath bc
 addpath surfels
+addpath viz
 
 % Algorithm steps:
 % Initialize meso (f)
@@ -80,26 +81,27 @@ v1 = parallel / surfels;
 v2 = -c_wall * dt; % a v2 for every eligible lattice link.
 
 
-% Surfel and lattice check.
-figure;
-hold on;
-plot_lattice_lines(nodes);
-[considered, ~] = size(c_wall);
-for lv = 1:considered
-    for k = 1:2:surfels
-        plot_surfel(p0(k,:), v1, v2(lv,:));
-        [bmin, bmax, imin, imax] = pgram_bounds(p0(k,:), v1, v2(lv,:),dh);
-        plot_bounding_box(bmin,bmax);
-    end
-end
-plot([cut_end_x,0],[0,cut_start_y]); 
+% % Surfel and lattice check.
+% figure;
+% hold on;
+% plot_lattice_lines(nodes);
+% [considered, ~] = size(c_wall);
+% for lv = 1:considered
+%     for k = 1:2:surfels
+%         plot_surfel(p0(k,:), v1, v2(lv,:));
+%         [bmin, bmax, imin, imax] = pgram_bounds(p0(k,:), v1, v2(lv,:),dh);
+%         plot_bounding_box(bmin,bmax);
+%     end
+% end
+% plot([cut_end_x,0],[0,cut_start_y]); 
 
 % get the touched cells, so we can save their prestreaming distributions.
-% [tc, lasts] = find_touched_cells([cut_end_x,0;0,cut_start_y],dh, ...
+% [~, lasts] = find_touched_cells([cut_end_x,0;0,cut_start_y],dh, ...
 %     cut_start_y,cut_end_x);
 disp('Finding cut cells');
 tc = find_cut_cells([cut_end_x,0;0,cut_start_y],dh, ...
     cut_start_y,cut_end_x);
+inactive = find_inactive_cells(tc,nodes);
 disp('Finding fluid areas');
 fluid_areas = fluid_areas_table(tc, nodes, dh);
 % lets get the surfel objects, which contain pgrams and touched_cells.
@@ -141,6 +143,7 @@ v(:,end) = 0;
 % Enforce cut corner bc.
 % [f,rho,u,v] = zero_out_of_bounds(f,rho,u,v,lasts);
 
+
 % ad hoc bounced back indices for 45 degree cut.
 bounced = [2, 3, 6];
 
@@ -166,9 +169,21 @@ for iter = 1:timesteps
 %     f = preload_inactive_cells(f,lasts);
 
     f = collect(ss,f,fluid_areas);
+    
+    
+    
+    f = neutralize_cells(f,inactive);
     f = stream(f);
+    f = neutralize_cells(f,inactive);
+    
+    [u,v,rho] = reconstruct_macro_all(f);
+    visualize_mag(u(1:10,1:10), v(1:10,1:10), u_lb);
+    
     f = area_scale_distributions(f, fluid_areas);
     f = scatter(ss,f,fluid_areas);
+    
+    [u,v,rho] = reconstruct_macro_all(f);
+    visualize_mag(u(1:10,1:10), v(1:10,1:10), u_lb);
     
     % load (the saved) cut corner distributions.
 %     f = load_wall_distributions(f,saved,ci);
@@ -193,6 +208,8 @@ for iter = 1:timesteps
     
     % Determine macro variables and apply macro BCs
     [u,v,rho] = reconstruct_macro_all(f);
+%     visualize_mag(u, v, u_lb);
+    visualize_mag(u(1:10,1:10), v(1:10,1:10), u_lb);
     u(end,2:end-1) = u_lb;
     v(end,2:end-1) = 0;
     u(1,:) = 0;
@@ -205,12 +222,9 @@ for iter = 1:timesteps
     % VISUALIZATION
     % Modified from Jonas Latt's cavity code on the Palabos website.
     if (mod(iter,1)==0)
-        uu = sqrt(u.^2+v.^2) / u_lb;
-        imagesc(flipud(uu));
-%         imagesc(flipud(f(:,:,2)));
-        colorbar
-        axis equal off; drawnow
+        visualize_mag(u, v, u_lb);
     end
+    
 end
 disp('Done!');
 

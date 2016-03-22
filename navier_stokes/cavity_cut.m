@@ -108,6 +108,8 @@ fluid_areas = fluid_areas_table(tc, nodes, dh);
 disp('Generating surfels');
 ss = generate_surfels(p0,v1,dt,dh);
 
+tc = fill_touched_cell_info(tc, ss, nodes);
+
 % all-important weights for bc enforcement... 
 % weights = surfel_weights(p0,v1,v2,dh,tc); 
 

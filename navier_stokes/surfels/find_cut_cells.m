@@ -13,6 +13,7 @@ tc = [];
 counter = 1;
 finished = 0;
 % last_j = 1;
+normal = [ray(2); -ray(1)] / norm(ray,2);
 for j = 1:nodes
     % lets go row by row.
     checking = 1;
@@ -64,7 +65,7 @@ for j = 1:nodes
             % end cell area subroutine.
             
 %             tc(counter) = touched_cell(i, j, cell_fluid_area);
-            tc = [tc, touched_cell(i, j, cell_fluid_area)];
+            tc = [tc, touched_cell(i, j, cell_fluid_area, normal)];
             counter = counter + 1;
         elseif i == i_start
             i_start = i_start - 1;

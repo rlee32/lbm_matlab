@@ -1,8 +1,8 @@
-function visualize_mag(u, v, u_lb)
+function visualize_mag(u, v)
 % VISUALIZATION
 % Modified from Jonas Latt's cavity code on the Palabos website.
 
-uu = sqrt(u.^2+v.^2) / u_lb;
+uu = sqrt(u.^2+v.^2);
 imagesc(flipud(uu));
 %         imagesc(flipud(f(:,:,2)));
 colorbar

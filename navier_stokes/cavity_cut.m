@@ -143,10 +143,6 @@ v(:,end) = 0;
 % Enforce cut corner bc.
 % [f,rho,u,v] = zero_out_of_bounds(f,rho,u,v,lasts);
 
-
-% ad hoc bounced back indices for 45 degree cut.
-bounced = [2, 3, 6];
-
 % Main loop.
 disp(['Running ' num2str(timesteps) ' timesteps...']);
 for iter = 1:timesteps
@@ -170,20 +166,18 @@ for iter = 1:timesteps
 
     f = collect(ss,f,fluid_areas);
     
-    
-    
     f = neutralize_cells(f,inactive);
     f = stream(f);
     f = neutralize_cells(f,inactive);
     
-    [u,v,rho] = reconstruct_macro_all(f);
-    visualize_mag(u(1:10,1:10), v(1:10,1:10), u_lb);
+%     [u,v,rho] = reconstruct_macro_all(f);
+%     visualize_mag(u(1:10,1:10), v(1:10,1:10), u_lb);
     
-    f = area_scale_distributions(f, fluid_areas);
+%     f = area_scale_distributions(f, fluid_areas);
     f = scatter(ss,f,fluid_areas);
     
-    [u,v,rho] = reconstruct_macro_all(f);
-    visualize_mag(u(1:10,1:10), v(1:10,1:10), u_lb);
+%     [u,v,rho] = reconstruct_macro_all(f);
+%     visualize_mag(u(1:10,1:10), v(1:10,1:10), u_lb);
     
     % load (the saved) cut corner distributions.
 %     f = load_wall_distributions(f,saved,ci);
@@ -209,7 +203,7 @@ for iter = 1:timesteps
     % Determine macro variables and apply macro BCs
     [u,v,rho] = reconstruct_macro_all(f);
 %     visualize_mag(u, v, u_lb);
-    visualize_mag(u(1:10,1:10), v(1:10,1:10), u_lb);
+%     visualize_mag(u(1:10,1:10), v(1:10,1:10));
     u(end,2:end-1) = u_lb;
     v(end,2:end-1) = 0;
     u(1,:) = 0;
@@ -222,7 +216,7 @@ for iter = 1:timesteps
     % VISUALIZATION
     % Modified from Jonas Latt's cavity code on the Palabos website.
     if (mod(iter,1)==0)
-        visualize_mag(u, v, u_lb);
+        visualize_mag(u, v);
     end
     
 end

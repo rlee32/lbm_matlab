@@ -32,12 +32,13 @@ classdef pgram < handle
                 cell_particles = ff * fa;
                 overlapped = obj.weights(k) * obj.area / fa;
                 taken_particles = overlapped * cell_particles;
+%                 taken_particles = obj.weights(k) * cell_particles;
                 obj.collected_particles = obj.collected_particles + ...
                     taken_particles;
                 % update distribution
-                f(obj.cellj(k), obj.celli(k), obj.lattice_index) = ...
-                    ( cell_particles - taken_particles ) / ...
-                    fa;
+%                 f(obj.cellj(k), obj.celli(k), obj.lattice_index) = ...
+%                     ( cell_particles - taken_particles ) / ...
+%                     fa;
             end
         end
         function f = scatter(obj, f, fluid_areas)

@@ -82,7 +82,7 @@ on its own.
 
 ## References
 
-* \1998. Hudong Chen, Chris Teixeira, and Kim Molvig. 
+* (1998) Hudong Chen, Chris Teixeira, and Kim Molvig. 
   REALIZATION OF FLUID BOUNDARY CONDITIONS VIA DISCRETE BOLTZMANN DYNAMICS.
 
 * 2011. Yanbing Li. 

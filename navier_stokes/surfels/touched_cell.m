@@ -1,7 +1,7 @@
 classdef touched_cell
     properties
         surface_normal          % vector of surface normal that points into the fluid domain.
-        lattice_indices         % the lattice velocity indices that need to be advected from this cell.
+        lattice_indices         % the BOUNCEBACK lattice velocity indices that need to be advected from this cell.
         i                       % i index of this touched cell.
         j                       % j index of this touched cell.
         fluid_area              % the area of this cell that is present in the fluid domain.
@@ -9,6 +9,10 @@ classdef touched_cell
         overlap_areas           % overlap areas with this cell, corresponding to pgrams / lattice_indices.
         non_overlap_area        % area that is not overlapped with the k surfel.
         distributed_particles   % particles distributed to this cell from pgrams.
+        nonoverlap_ratios       % corresponds with lattice_indices. used to scale advection particles. ratio of cell area that is not overlapped with pgrams.
+        bi                      % corresponds with lattice indices. neighbouring cell in the bounced direction.
+        bj                      % corresponds with lattice indices. neighbouring cell in the bounced direction.
+        advection_scales         % corresponds with lattice indices.  
     end
     properties (Constant)
         c = [0, 0; ...
@@ -34,9 +38,6 @@ classdef touched_cell
                     obj.lattice_indices = [obj.lattice_indices, k];
                 end
             end
-        end
-        function set_overlap_areas(obj, overlap_areas)
-            obj.overlap_areas = overlap_areas;
         end
 %         function fa = advected_particles(obj, f)
 %             fa = f(obj.j,obj.i,obj.k) * obj.non_overlap_area;

@@ -78,22 +78,22 @@ p0 = (0:surfels-1)' * cut_length / surfels * unit_parallel;
 p0(:,1) = p0(:,1) + cut_end_x;
 v1 = parallel / surfels;
 % v2 = -c_wall .* repmat(unit_normal,length(c_wall),1) * dt; % a v2 for every eligible lattice link.
-v2 = -c_wall * dt; % a v2 for every eligible lattice link.
+v2 = -c_wall * dh; % a v2 for every eligible lattice link.
 
 
-% % Surfel and lattice check.
-% figure;
-% hold on;
-% plot_lattice_lines(nodes);
-% [considered, ~] = size(c_wall);
-% for lv = 1:considered
-%     for k = 1:2:surfels
-%         plot_surfel(p0(k,:), v1, v2(lv,:));
-%         [bmin, bmax, imin, imax] = pgram_bounds(p0(k,:), v1, v2(lv,:),dh);
-%         plot_bounding_box(bmin,bmax);
-%     end
-% end
-% plot([cut_end_x,0],[0,cut_start_y]); 
+% Surfel and lattice check.
+figure;
+hold on;
+plot_lattice_lines(nodes);
+[considered, ~] = size(c_wall);
+for lv = 1:considered
+    for k = 1:3:surfels
+        plot_surfel(p0(k,:), v1, v2(lv,:));
+        [bmin, bmax, imin, imax] = pgram_bounds(p0(k,:), v1, v2(lv,:),dh);
+        plot_bounding_box(bmin,bmax);
+    end
+end
+plot([cut_end_x,0],[0,cut_start_y]); 
 
 % get the touched cells, so we can save their prestreaming distributions.
 % [~, lasts] = find_touched_cells([cut_end_x,0;0,cut_start_y],dh, ...
@@ -108,7 +108,7 @@ fluid_areas = fluid_areas_table(tc, nodes, dh);
 disp('Generating surfels');
 ss = generate_surfels(p0,v1,dt,dh);
 
-tc = fill_touched_cell_info(tc, ss, nodes);
+[tc, total_overlap_areas] = fill_touched_cell_info(tc, ss, nodes, dh);
 
 % all-important weights for bc enforcement... 
 % weights = surfel_weights(p0,v1,v2,dh,tc); 
@@ -166,17 +166,26 @@ for iter = 1:timesteps
 %     saved = save_wall_distributions(f,tc,ci);
 %     f = preload_inactive_cells(f,lasts);
 
-    f = collect(ss,f,fluid_areas);
+    collect(ss,f,fluid_areas);
+    
+%     f = zero_cut_cells(tc,f);
+    disp('Applying advection scale...');
+    f = apply_advection_scale(f,tc);
+    disp('Done applying advection scale.');
     
     f = neutralize_cells(f,inactive);
+    disp('Streaming...');
     f = stream(f);
+    disp('Done streaming.');
     f = neutralize_cells(f,inactive);
     
 %     [u,v,rho] = reconstruct_macro_all(f);
 %     visualize_mag(u(1:10,1:10), v(1:10,1:10), u_lb);
     
 %     f = area_scale_distributions(f, fluid_areas);
-    f = scatter(ss,f,fluid_areas);
+    disp('Scattering...');
+    f = scatter(ss,f,fluid_areas, total_overlap_areas);
+    disp('Done Scattering.');
     
 %     [u,v,rho] = reconstruct_macro_all(f);
 %     visualize_mag(u(1:10,1:10), v(1:10,1:10), u_lb);

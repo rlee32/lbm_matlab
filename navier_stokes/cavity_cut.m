@@ -38,17 +38,17 @@ addpath viz
 %   4. load the saved wall distributions.
 
 % Physical parameters.
-L_p = 0.6;%1.1; % Cavity dimension. 
+L_p = 0.2;%1.1; % Cavity dimension. 
 U_p = 6;%1.1; % Cavity lid velocity.
 nu_p = 1.2e-3;%1.586e-5; % Physical kinematic viscosity.
 rho0 = 1;
-cut_start_y = 0.2; % non-dimensional y-position on the west boundary.
-cut_end_x = 0.2; % non-dimensional x-position on the south boundary.
+cut_start_y = 0.75; % non-dimensional y-position on the west boundary.
+cut_end_x = 0.75; % non-dimensional x-position on the south boundary.
 % Discrete/numerical parameters.
 nodes = 100;
-dt = .003;
+dt = .006;
 timesteps = 10000;
-surfels = 20; % 'surface elements', the number of cut surface elements attributed to the cut.
+surfels = 75; % 'surface elements', the number of cut surface elements attributed to the cut.
 
 % Derived nondimensional parameters.
 Re = L_p * U_p / nu_p;

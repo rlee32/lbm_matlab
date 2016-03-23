@@ -42,13 +42,13 @@ L_p = 0.6;%1.1; % Cavity dimension.
 U_p = 6;%1.1; % Cavity lid velocity.
 nu_p = 1.2e-3;%1.586e-5; % Physical kinematic viscosity.
 rho0 = 1;
-cut_start_y = 0.1; % non-dimensional y-position on the west boundary.
-cut_end_x = 0.1; % non-dimensional x-position on the south boundary.
+cut_start_y = 0.2; % non-dimensional y-position on the west boundary.
+cut_end_x = 0.2; % non-dimensional x-position on the south boundary.
 % Discrete/numerical parameters.
 nodes = 100;
 dt = .003;
 timesteps = 10000;
-surfels = 10; % 'surface elements', the number of cut surface elements attributed to the cut.
+surfels = 20; % 'surface elements', the number of cut surface elements attributed to the cut.
 
 % Derived nondimensional parameters.
 Re = L_p * U_p / nu_p;
@@ -75,38 +75,29 @@ unit_normal = [-parallel(1), parallel(2)] / cut_length;
 [c_wall, ci] = relevant_lattice_speeds(unit_normal);
 % Let's determine the pgrams.
 p0 = (0:surfels-1)' * cut_length / surfels * unit_parallel;
-p0(:,1) = p0(:,1) + cut_end_x;
+p0(:,1) = p0(:,1) + cut_end_x - dh/2;
+p0(:,2) = p0(:,2) - dh/2;
 v1 = parallel / surfels;
 % v2 = -c_wall .* repmat(unit_normal,length(c_wall),1) * dt; % a v2 for every eligible lattice link.
 v2 = -c_wall * dh; % a v2 for every eligible lattice link.
-
-
-% Surfel and lattice check.
-figure;
-hold on;
-plot_lattice_lines(nodes);
-[considered, ~] = size(c_wall);
-for lv = 1:considered
-    for k = 1:3:surfels
-        plot_surfel(p0(k,:), v1, v2(lv,:));
-        [bmin, bmax, imin, imax] = pgram_bounds(p0(k,:), v1, v2(lv,:),dh);
-        plot_bounding_box(bmin,bmax);
-    end
-end
-plot([cut_end_x,0],[0,cut_start_y]); 
 
 % get the touched cells, so we can save their prestreaming distributions.
 % [~, lasts] = find_touched_cells([cut_end_x,0;0,cut_start_y],dh, ...
 %     cut_start_y,cut_end_x);
 disp('Finding cut cells');
-tc = find_cut_cells([cut_end_x,0;0,cut_start_y],dh, ...
-    cut_start_y,cut_end_x);
+% tc = find_cut_cells([cut_end_x,0;0,cut_start_y],dh, ...
+%     cut_start_y,cut_end_x);
+
+tc = find_cut_cells2([cut_end_x,-dh;-dh,cut_start_y],dh);
+
 inactive = find_inactive_cells(tc,nodes);
 disp('Finding fluid areas');
 fluid_areas = fluid_areas_table(tc, nodes, dh);
 % lets get the surfel objects, which contain pgrams and touched_cells.
 disp('Generating surfels');
 ss = generate_surfels(p0,v1,dt,dh);
+
+plot_surfels(ss,nodes,dh);
 
 [tc, total_overlap_areas] = fill_touched_cell_info(tc, ss, nodes, dh);
 
@@ -146,6 +137,7 @@ v(:,end) = 0;
 % [f,rho,u,v] = zero_out_of_bounds(f,rho,u,v,lasts);
 
 % Main loop.
+figure;
 disp(['Running ' num2str(timesteps) ' timesteps...']);
 for iter = 1:timesteps
     if (mod(iter,timesteps/10)==0)
@@ -169,23 +161,23 @@ for iter = 1:timesteps
     collect(ss,f,fluid_areas);
     
 %     f = zero_cut_cells(tc,f);
-    disp('Applying advection scale...');
+%     disp('Applying advection scale...');
     f = apply_advection_scale(f,tc);
-    disp('Done applying advection scale.');
+%     disp('Done applying advection scale.');
     
     f = neutralize_cells(f,inactive);
-    disp('Streaming...');
+%     disp('Streaming...');
     f = stream(f);
-    disp('Done streaming.');
+%     disp('Done streaming.');
     f = neutralize_cells(f,inactive);
     
 %     [u,v,rho] = reconstruct_macro_all(f);
 %     visualize_mag(u(1:10,1:10), v(1:10,1:10), u_lb);
     
 %     f = area_scale_distributions(f, fluid_areas);
-    disp('Scattering...');
+%     disp('Scattering...');
     f = scatter(ss,f,fluid_areas, total_overlap_areas);
-    disp('Done Scattering.');
+%     disp('Done Scattering.');
     
 %     [u,v,rho] = reconstruct_macro_all(f);
 %     visualize_mag(u(1:10,1:10), v(1:10,1:10), u_lb);

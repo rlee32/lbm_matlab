@@ -5,12 +5,12 @@ function [tc, overlap_areas] = fill_touched_cell_info(tc, ss, nodes, dh)
 overlap_areas = zeros(nodes,nodes,9);
 for s = ss
     for p = s.pgrams
+        li = p.lattice_index;
+        bb = bounceback_components(li);
         for k = 1:length(p.celli)
             i = p.celli(k);
             j = p.cellj(k);
             a = p.overlap_areas(k);
-            li = p.lattice_index;
-            bb = bounceback_components(li);
             overlap_areas(j, i, bb) = overlap_areas(j, i, bb) + a;
         end
     end

@@ -1,4 +1,4 @@
-function plot_surfel(p0, v1, v2)
+function plot_pgram(p0, v1, v2)
 
 plot([p0(1), p0(1)+v1(1)], [p0(2), p0(2)+v1(2)]);  
 hold on;      

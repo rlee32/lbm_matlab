@@ -125,7 +125,7 @@ classdef pgram < handle
                     minpos = [x0 + dh*(i-1), y0 + dh*(j-1)];
                     overlap_area = overlap_pgram_cell( ...
                         obj.p0, obj.surface, obj.extrusion, minpos, dh);
-                    if overlap_area
+                    if overlap_area > eps
                         obj.overlap_areas = [obj.overlap_areas, overlap_area];
                         obj.celli = [obj.celli, i];
                         obj.cellj = [obj.cellj, j];

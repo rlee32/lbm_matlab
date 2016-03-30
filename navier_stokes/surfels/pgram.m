@@ -24,33 +24,41 @@ classdef pgram < handle
             compute_area(obj, surface, extrusion);
             determine_weights(obj,dh);            
         end
-        function f = collect(obj, f, fluid_areas)
+        function collect(obj, f, fluid_areas)
             obj.collected_particles = 0;
             for k = 1:length(obj.celli)
                 ff = f(obj.cellj(k), obj.celli(k), obj.lattice_index);
                 fa = fluid_areas(obj.cellj(k), obj.celli(k));
                 cell_particles = ff * fa;
-                overlapped = obj.weights(k) * obj.area / fa;
-                taken_particles = overlapped * cell_particles;
+                overlapped_area = obj.weights(k) * obj.area;
+                overlapped_ratio = overlapped_area / fa;
+                taken_particles = overlapped_ratio * cell_particles;
+%                 taken_particles = obj.weights(k) * cell_particles;
                 obj.collected_particles = obj.collected_particles + ...
                     taken_particles;
                 % update distribution
-                f(obj.cellj(k), obj.celli(k), obj.lattice_index) = ...
-                    ( cell_particles - taken_particles ) / ...
-                    fa;
+%                 f(obj.cellj(k), obj.celli(k), obj.lattice_index) = ...
+%                     ( cell_particles - taken_particles ) / ...
+%                     fa;
             end
         end
-        function f = scatter(obj, f, fluid_areas)
+        function f = scatter(obj, f, fluid_areas, total_overlap_areas)
             for k = 1:length(obj.celli)
                 opposite_index = opposite_lattice_index(obj);
                 ff = f(obj.cellj(k), obj.celli(k), opposite_index);
                 fa = fluid_areas(obj.cellj(k), obj.celli(k));
                 cell_particles = ff * fa;
+%                 cell_particles = ff * total_overlap_areas( ...
+%                     obj.cellj(k), obj.celli(k), opposite_index );
                 scatter_particles = obj.weights(k) * ...
                     obj.collected_particles;
                 % update distribution
                 f(obj.cellj(k), obj.celli(k), opposite_index) = ...
                     ( cell_particles + scatter_particles ) / fa;
+%                 f(obj.cellj(k), obj.celli(k), opposite_index) = ...
+%                     ( cell_particles + scatter_particles ) ...
+%                     / total_overlap_areas(obj.cellj(k), obj.celli(k), ...
+%                     opposite_index);
             end
         end
 %         function [fd, cell_indices] = distribute_particles(obj)
@@ -117,7 +125,7 @@ classdef pgram < handle
                     minpos = [x0 + dh*(i-1), y0 + dh*(j-1)];
                     overlap_area = overlap_pgram_cell( ...
                         obj.p0, obj.surface, obj.extrusion, minpos, dh);
-                    if overlap_area
+                    if overlap_area > eps
                         obj.overlap_areas = [obj.overlap_areas, overlap_area];
                         obj.celli = [obj.celli, i];
                         obj.cellj = [obj.cellj, j];

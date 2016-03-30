@@ -1,7 +1,8 @@
-function tc = find_cut_cells(segment,dh,cut_start_y,cut_end_x)
+function tc = find_cut_cells2(segment,dh)
 % returns a vector of handles to each touched_cell.
 % gets the indices of the cells touched by segment.
 % We assume the segment starts on bottom and ends on left wall.
+% segment: the whole surface as a line; the cell 'cutter' of our cut cells.
 
 ray = segment(2,:) - segment(1,:);
 nodes = round( 1 / dh );
@@ -44,21 +45,21 @@ for j = 1:nodes
             if cross2d([xmin+dh,ymin]-segment(1,:),ray) > 0
                 points(6,:) = [xmin+dh, ymin, 1];
             end
-            % East wall, did not intersect top
-            if xmin == -dh/2 && points(3,3) == 0
-                points(7,:) = [0, ymin+dh, 1];
-                points(8,:) = [0, cut_start_y, 1];
-            end
-            % Bottom wall, did not intersect east
-            if ymin == -dh/2 && points(2,3) == 0
-                points(9,:) = [xmin+dh, 0, 1];
-                points(10,:) = [cut_end_x, 0, 1];
-            end
+%             % East wall, did not intersect top
+%             if xmin == -dh/2 && points(3,3) == 0
+%                 points(7,:) = [0, ymin+dh, 1];
+%                 points(8,:) = [0, cut_start_y, 1];
+%             end
+%             % Bottom wall, did not intersect east
+%             if ymin == -dh/2 && points(2,3) == 0
+%                 points(9,:) = [xmin+dh, 0, 1];
+%                 points(10,:) = [cut_end_x, 0, 1];
+%             end
             % top right corner.
             points(11,:) = [xmin+dh,ymin+dh,1];
             % disable intersections outside of fluid domain.
-            points(points(:,1) < 0,3) = 0;
-            points(points(:,2) < 0,3) = 0;
+%             points(points(:,1) < 0,3) = 0;
+%             points(points(:,2) < 0,3) = 0;
             points = points(points(:,3) == 1, 1:2);
             points = reorder_polygon_points(points);
             cell_fluid_area = polyarea( points(:,1), points(:,2) );

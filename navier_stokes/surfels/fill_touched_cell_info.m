@@ -74,6 +74,9 @@ for tck = 1:length(tc)
             na = dh^2;
         end
         tc(tck).advection_scales(k) = fa / na;
+        if na ~= dh^2
+            disp('unexpected');
+        end
     end
 end
 

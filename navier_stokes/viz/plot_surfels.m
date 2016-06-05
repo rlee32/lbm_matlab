@@ -3,6 +3,7 @@ function plot_surfels(ss,nodes,dh)
 
 figure;
 hold on;
+axis equal tight;
 plot_lattice_lines(nodes);
 stride = 3;
 for k = 1:stride:length(ss)

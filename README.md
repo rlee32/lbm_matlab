@@ -2,6 +2,11 @@
 Lattice Boltzmann Method (LBM) codes in MATLAB for educational purposes. 
 I developed these as a feature-wise precursor to my more serious C++ version.  
 
+IMPORTANT NOTE: The velocities in the default navier stokes versions are set 
+to 1, which leads to breakdown of the incompressible assumption. You will need 
+to set the velocities to proper values. Please see my c++ version for a more 
+readily validated version.  
+
 The features I explore here in the Navier-Stokes code are (see the references 
 section for titles and more info):  
 

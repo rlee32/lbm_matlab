@@ -20,6 +20,20 @@ S_vec = [1, 1.2, 1, 1, 1.2, 1, 1.2, om, om]'; % 2015 Zhang et al.
 MinvS = Minv*diag(S_vec);
 [rows, cols] = size(rho);
 
+% Different orientation of vector indices
+reorder = [1,2,6,3,7,4,8,5,9];
+M_ = M(:,reorder);
+Minv_coeff = 36*inv(M_);
+% Minv_ = Minv_coeff / 36;
+% S_vec_ = S_vec(reorder);
+% MinvS_ = Minv_*diag(S_vec_);
+% MinvS_ = Minv_*diag(S_vec);
+% MinvS_coeff = 36*(Minv_*diag(S_vec));
+S_vec2 = S_vec;
+S_vec2([8,9]) = 1;
+mdiff = Minv*diag(S_vec2) - MinvS;
+mdiff_coeff = mdiff*36;
+
 % Determine m - meq.
 deltam = zeros(rows, cols, 9);
 % First fill with m.

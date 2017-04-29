@@ -22,6 +22,7 @@ f1 = zeros(nodes(2),nodes(1));
 f2 = zeros(nodes(2),nodes(1));
 f3 = zeros(nodes(2),nodes(1));
 f4 = zeros(nodes(2),nodes(1));
+feq = zeros(nodes(2),nodes(1));
 
 % Main loop.
 for iter = 1:timesteps

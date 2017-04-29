@@ -20,6 +20,7 @@ omega = 1 / ( alpha / (dt*csq) + 0.5 );
 % Initial conditions.
 f1 = zeros(nodes,1);
 f2 = zeros(nodes,1);
+rho = zeros(nodes,1);
 
 % Main loop.
 for iter = 1:timesteps

@@ -19,6 +19,7 @@ x = linspace(0,L,nodes)';
 rho = zeros(nodes,1);
 f1 = zeros(nodes,1);
 f2 = zeros(nodes,1);
+feq = zeros(nodes,1);
 
 % Main loop.
 for iter = 1:timesteps

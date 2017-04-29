@@ -35,6 +35,7 @@ x = linspace(0,L(1),nodes(1))';
 y = linspace(0,L(2),nodes(2))';
 f = zeros(nodes(2),nodes(1),9);
 feq = zeros(nodes(2),nodes(1),9);
+rho = zeros(nodes(2),nodes(1));
 % BC initialize.
 for k = 1:9
     f(:,1,k) = w(k)*twall; % left wall.
